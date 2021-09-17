@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ipcRenderer } from 'electron';
+import electron, { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Transition } from 'react-transition-group';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,6 +38,10 @@ const LoginButton = styled(Button)`
 `;
 
 const MicrosoftLoginButton = styled(LoginButton)`
+  margin-top: 10px;
+`;
+
+const MetamaskLoginButton = styled(LoginButton)`
   margin-top: 10px;
 `;
 
@@ -185,6 +189,11 @@ const Login = () => {
     ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
   }, []);
 
+  const openChromeWithMetamask = () => {
+    electron.shell.openExternal('http://localhost:3001?username=123123');
+    // ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
+  };
+
   return (
     <Transition in={loading} timeout={300}>
       {transitionState => (
@@ -194,7 +203,7 @@ const Login = () => {
               <HorizontalLogo size={200} />
             </Header>
             <Form>
-              <div>
+              {/* <div>
                 <Input
                   placeholder="Email"
                   value={email}
@@ -232,7 +241,26 @@ const Login = () => {
                   `}
                   icon={faExternalLinkAlt}
                 />
-              </MicrosoftLoginButton>
+              </MicrosoftLoginButton> */}
+              <div>
+                <Input
+                  placeholder="username"
+                  value={email}
+                  onChange={({ target: { value } }) => setEmail(value)}
+                />
+              </div>
+              <MetamaskLoginButton
+                color="primary"
+                onClick={openChromeWithMetamask}
+              >
+                Sign in with Metamask
+                <FontAwesomeIcon
+                  css={`
+                    margin-left: 6px;
+                  `}
+                  icon={faExternalLinkAlt}
+                />
+              </MetamaskLoginButton>
             </Form>
             <Footer>
               <div
