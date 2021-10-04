@@ -14,7 +14,8 @@ import {
   MINECRAFT_SERVICES_URL,
   FTB_API_URL,
   JAVA16_MANIFEST_URL,
-  GDL_SERVE_API
+  GDL_SERVE_API,
+  METACRAFT_SERVICES_URL
 } from './utils/constants';
 import { sortByDate } from './utils';
 import ga from './utils/analytics';
@@ -131,6 +132,30 @@ export const msOAuthRefresh = (clientId, refreshToken) => {
         'X-Skip-Origin': 'skip'
       }
     }
+  );
+};
+
+// MetaCraft API
+export const metaCraftAuthenticateRequest = ({
+  address,
+  username,
+  signature,
+  timestamp
+}) => {
+  return axios.post(
+    `${METACRAFT_SERVICES_URL}/authenticate`,
+    {
+      agent: {
+        name: 'Minecraft',
+        version: 1
+      },
+      username,
+      address,
+      signature,
+      timestamp,
+      requestUser: true
+    },
+    { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
   );
 };
 

@@ -206,5 +206,12 @@
     "typeface-roboto": "^1.1.13",
     "use-debounce": "^7.0.0",
     "uuid": "^8.3.2"
+  },
+  "mac": {
+    "extendInfo": {
+      "CFBundleURLSchemes": [
+        "metacraft"
+      ]
+    }
   }
 }

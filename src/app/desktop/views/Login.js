@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import electron, { ipcRenderer } from 'electron';
 import styled from 'styled-components';
@@ -16,6 +16,7 @@ import features from '../../../common/reducers/loading/features';
 import backgroundVideo from '../../../common/assets/background.webm';
 import HorizontalLogo from '../../../ui/HorizontalLogo';
 import { openModal } from '../../../common/reducers/modals/actions';
+import { metaCraftAuthenticateRequest } from '../../../common/api';
 
 const LoginButton = styled(Button)`
   border-radius: 4px;
@@ -148,6 +149,7 @@ const LoginFailMessage = styled.div`
 
 const Login = () => {
   const dispatch = useDispatch();
+  const [username, setUsername] = useState(null);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [version, setVersion] = useState(null);
@@ -190,9 +192,35 @@ const Login = () => {
   }, []);
 
   const openChromeWithMetamask = () => {
-    electron.shell.openExternal('http://localhost:3001?username=123123');
-    // ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
+    ipcRenderer.invoke('loginWithMetamask', { username });
   };
+
+  useEffect(() => {
+    ipcRenderer.on('receive-metamask-login-params', (e, params) => {
+      console.log(params, username);
+      console.log('authenticate ....');
+      metaCraftAuthenticateRequest({
+        ...params,
+        timestamp: Number(params.timestamp),
+        username
+      })
+        .then(data => {
+          if (data.error) {
+            return Promise.reject(data.errorMessage);
+          }
+          console.log(data);
+          return Promise.resolve(data);
+        })
+        .catch(error => {
+          console.error(error);
+          // alert(error.message);
+        });
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners('receive-metamask-login-params');
+    };
+  }, [username]);
 
   return (
     <Transition in={loading} timeout={300}>
@@ -245,8 +273,10 @@ const Login = () => {
               <div>
                 <Input
                   placeholder="username"
-                  value={email}
-                  onChange={({ target: { value } }) => setEmail(value)}
+                  value={username}
+                  onChange={({ target: { value } }) => {
+                    setUsername(value);
+                  }}
                 />
               </div>
               <MetamaskLoginButton

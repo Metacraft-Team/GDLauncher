@@ -36,8 +36,33 @@ const gotTheLock = app.requestSingleInstanceLock();
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// 注册协议
+const PROTOCOL = 'metacraft';
+app.setAsDefaultProtocolClient(PROTOCOL);
+
 // Prevent multiple instances
 if (gotTheLock) {
+  app.on('open-url', (event, urlStr) => {
+    log.log('mac 准备执行网页端调起客户端逻辑');
+    log.log('urlStr: ', urlStr);
+    const urlObj = new URL(urlStr);
+    const { searchParams } = urlObj;
+    const signature = searchParams.get('signature');
+    const address = searchParams.get('address');
+    const timestamp = searchParams.get('timestamp');
+
+    log.log(signature, address, timestamp);
+
+    if (mainWindow) {
+      log.log('mainWindow webContents send');
+      mainWindow.webContents.send('receive-metamask-login-params', {
+        signature,
+        address,
+        timestamp
+      });
+    }
+  });
+
   app.on('second-instance', (e, argv) => {
     if (process.platform === 'win32') {
       const args = process.argv.slice(1);
@@ -385,6 +410,23 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
+});
+
+app.on('web-contents-created', (e, webContents) => {
+  webContents.on('new-window', (event, url) => {
+    console.log('========== new-window');
+
+    event.preventDefault();
+    shell.openExternal(url);
+  });
+});
+
+ipcMain.handle('loginWithMetamask', (e, { username }) => {
+  // log.log('========  loginWithMetamask');
+  // const metamaskWebUrl = new URL('http://localhost:3001');
+  // metamaskWebUrl.searchParams.set('username', 123123);
+  // https://metacraft-frontend.vercel.app/
+  shell.openExternal(`http://localhost:3001?username=${username}`);
 });
 
 ipcMain.handle(
