@@ -136,6 +136,13 @@ export const msOAuthRefresh = (clientId, refreshToken) => {
 };
 
 // MetaCraft API
+
+export const metaCraftServerCheck = () => {
+  return axios.get(`${METACRAFT_SERVICES_URL}`, {
+    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+  });
+};
+
 export const metaCraftAuthenticateRequest = ({
   address,
   username,
@@ -143,7 +150,7 @@ export const metaCraftAuthenticateRequest = ({
   timestamp
 }) => {
   return axios.post(
-    `${METACRAFT_SERVICES_URL}/authenticate`,
+    `${METACRAFT_SERVICES_URL}/authserver/authenticate`,
     {
       agent: {
         name: 'Minecraft',

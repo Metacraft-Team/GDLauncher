@@ -38,8 +38,7 @@ export const MICROSOFT_OAUTH_REDIRECT_URL =
   'https://login.microsoftonline.com/common/oauth2/nativeclient';
 export const MINECRAFT_SERVICES_URL = 'https://api.minecraftservices.com';
 
-export const METACRAFT_SERVICES_URL =
-  'https://api.test.metacraft.cc/authserver';
+export const METACRAFT_SERVICES_URL = 'https://api.test.metacraft.cc';
 
 export const MC_STARTUP_METHODS = {
   SYMLINK: 'Symlink',

@@ -16,7 +16,10 @@ import features from '../../../common/reducers/loading/features';
 import backgroundVideo from '../../../common/assets/background.webm';
 import HorizontalLogo from '../../../ui/HorizontalLogo';
 import { openModal } from '../../../common/reducers/modals/actions';
-import { metaCraftAuthenticateRequest } from '../../../common/api';
+import {
+  metaCraftAuthenticateRequest,
+  metaCraftServerCheck
+} from '../../../common/api';
 
 const LoginButton = styled(Button)`
   border-radius: 4px;
@@ -189,6 +192,17 @@ const Login = () => {
 
   useEffect(() => {
     ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
+    fetchStatus().catch(console.error);
+
+    metaCraftServerCheck()
+      .then(result => {
+        console.log('metaCraftServerCheck: ', result);
+        const { meta, skinDomains, signaturePublickey } = result;
+        return Promise.resolve(result);
+      })
+      .catch(error => {
+        console.error('get metaData failed: ', error);
+      });
   }, []);
 
   const openChromeWithMetamask = () => {
@@ -204,12 +218,18 @@ const Login = () => {
         timestamp: Number(params.timestamp),
         username
       })
-        .then(data => {
-          if (data.error) {
-            return Promise.reject(data.errorMessage);
+        .then(result => {
+          if (result.error) {
+            return Promise.reject(result.errorMessage);
           }
-          console.log(data);
-          return Promise.resolve(data);
+
+          const {
+            data: { selectedProfile = {}, accessToken = '' }
+          } = result;
+          console.log(result);
+          console.log('selectedProfile: ', selectedProfile);
+          console.log('accessToken: ', accessToken);
+          return Promise.resolve(result);
         })
         .catch(error => {
           console.error(error);

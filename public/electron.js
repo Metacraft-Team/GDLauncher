@@ -422,11 +422,10 @@ app.on('web-contents-created', (e, webContents) => {
 });
 
 ipcMain.handle('loginWithMetamask', (e, { username }) => {
-  // log.log('========  loginWithMetamask');
-  // const metamaskWebUrl = new URL('http://localhost:3001');
-  // metamaskWebUrl.searchParams.set('username', 123123);
-  // https://metacraft-frontend.vercel.app/
-  shell.openExternal(`http://localhost:3001?username=${username}`);
+  const url = isDev
+    ? `http://localhost:3001/?username=${username}`
+    : `https://metacraft-frontend.vercel.app/?username=${username}`;
+  shell.openExternal(url);
 });
 
 ipcMain.handle(
