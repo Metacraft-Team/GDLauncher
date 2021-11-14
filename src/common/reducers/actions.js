@@ -2783,8 +2783,6 @@ export function launchInstance(instanceName) {
       ).toString('base64')}`
     ];
 
-    console.log('injectedJvmArguments: ', injectedJvmArguments);
-
     const injectedJvmArgumentsIndex = mcJson.arguments.jvm.findIndex(
       jvmItem => {
         if (typeof jvmItem === 'string') {
@@ -2799,8 +2797,6 @@ export function launchInstance(instanceName) {
       0,
       ...injectedJvmArguments
     );
-
-    console.log('mcJson.arguments.jvm: ', mcJson.arguments.jvm);
 
     const jvmArguments = getJvmArguments(
       libraries,
@@ -2846,8 +2842,6 @@ export function launchInstance(instanceName) {
         shell: true
       }
     );
-
-    console.log(jvmArguments.map(v => v.toString().replace(...replaceRegex)));
 
     const playTimer = setInterval(() => {
       dispatch(
