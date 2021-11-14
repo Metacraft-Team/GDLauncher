@@ -10,12 +10,12 @@ import RouteWithSubRoutes from '../../common/components/RouteWithSubRoutes';
 import {
   loginWithAccessToken,
   initManifests,
-  initNews,
   loginThroughNativeLauncher,
   switchToFirstValidAccount,
   checkClientToken,
   updateUserData,
-  loginWithOAuthAccessToken
+  loginWithOAuthAccessToken,
+  updateServerMetaData
 } from '../../common/reducers/actions';
 import {
   load,
@@ -34,6 +34,7 @@ import useTrackIdle from './utils/useTrackIdle';
 import { openModal } from '../../common/reducers/modals/actions';
 import Message from './components/Message';
 import { ACCOUNT_MICROSOFT } from '../../common/utils/constants';
+import { metaCraftServerCheck } from '../../common/api';
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -68,12 +69,26 @@ function DesktopRoot({ store }) {
     maxCount: 1
   });
 
+  const getMetaData = () => {
+    metaCraftServerCheck()
+      .then(async result => {
+        console.log('metaCraftServerCheck: ', result);
+        const metaData = await dispatch(updateServerMetaData(result.data));
+        console.log('metaData: ', metaData);
+        return metaData;
+      })
+      .catch(error => {
+        console.error('get metaData failed: ', error);
+      });
+
+    ipcRenderer.invoke('getAppdataPath').then(console.log).catch(console.error);
+  };
+
   const init = async () => {
     dispatch(requesting(features.mcAuthentication));
     const userDataStatic = await ipcRenderer.invoke('getUserData');
     const userData = dispatch(updateUserData(userDataStatic));
     await dispatch(checkClientToken());
-    dispatch(initNews());
 
     const manifests = await dispatch(initManifests());
 
@@ -152,6 +167,8 @@ function DesktopRoot({ store }) {
     ipcRenderer.on('custom-protocol-event', (e, data) => {
       console.log(data);
     });
+
+    getMetaData();
   };
 
   // Handle already logged in account redirect

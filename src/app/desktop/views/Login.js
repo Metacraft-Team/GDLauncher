@@ -10,16 +10,17 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Input, Button } from 'antd';
 import { useKey } from 'rooks';
-import { login, loginOAuth } from '../../../common/reducers/actions';
+import axios from 'axios';
+import {
+  login,
+  loginOAuth,
+  loginMetamask
+} from '../../../common/reducers/actions';
 import { load, requesting } from '../../../common/reducers/loading/actions';
 import features from '../../../common/reducers/loading/features';
 import backgroundVideo from '../../../common/assets/background.webm';
 import HorizontalLogo from '../../../ui/HorizontalLogo';
 import { openModal } from '../../../common/reducers/modals/actions';
-import {
-  metaCraftAuthenticateRequest,
-  metaCraftServerCheck
-} from '../../../common/api';
 
 const LoginButton = styled(Button)`
   border-radius: 4px;
@@ -193,16 +194,6 @@ const Login = () => {
   useEffect(() => {
     ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
     fetchStatus().catch(console.error);
-
-    metaCraftServerCheck()
-      .then(result => {
-        console.log('metaCraftServerCheck: ', result);
-        const { meta, skinDomains, signaturePublickey } = result;
-        return Promise.resolve(result);
-      })
-      .catch(error => {
-        console.error('get metaData failed: ', error);
-      });
   }, []);
 
   const openChromeWithMetamask = () => {
@@ -213,28 +204,14 @@ const Login = () => {
     ipcRenderer.on('receive-metamask-login-params', (e, params) => {
       console.log(params, username);
       console.log('authenticate ....');
-      metaCraftAuthenticateRequest({
-        ...params,
-        timestamp: Number(params.timestamp),
-        username
-      })
-        .then(result => {
-          if (result.error) {
-            return Promise.reject(result.errorMessage);
-          }
 
-          const {
-            data: { selectedProfile = {}, accessToken = '' }
-          } = result;
-          console.log(result);
-          console.log('selectedProfile: ', selectedProfile);
-          console.log('accessToken: ', accessToken);
-          return Promise.resolve(result);
+      dispatch(
+        loginMetamask({
+          ...params,
+          timestamp: Number(params.timestamp),
+          username
         })
-        .catch(error => {
-          console.error(error);
-          // alert(error.message);
-        });
+      );
     });
 
     return () => {

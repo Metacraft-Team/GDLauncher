@@ -118,6 +118,7 @@
     "dotenv": "^10.0.0",
     "electron": "^15.1.0",
     "electron-builder": "^22.11.7",
+    "electron-devtools-installer": "^3.2.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",

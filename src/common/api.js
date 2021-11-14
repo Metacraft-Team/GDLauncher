@@ -166,6 +166,29 @@ export const metaCraftAuthenticateRequest = ({
   );
 };
 
+export const metaCraftLogout = ({
+  address,
+  username,
+  signature,
+  timestamp
+}) => {
+  return axios.post(
+    `${METACRAFT_SERVICES_URL}/authserver/signout`,
+    {
+      agent: {
+        name: 'Minecraft',
+        version: 1
+      },
+      username,
+      address,
+      signature,
+      timestamp,
+      requestUser: true
+    },
+    { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+  );
+};
+
 // Minecraft API
 
 export const mcAuthenticate = (username, password, clientToken) => {

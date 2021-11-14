@@ -12,7 +12,6 @@ import gt from 'semver/functions/gt';
 import log from 'electron-log';
 import omitBy from 'lodash/omitBy';
 import { pipeline } from 'stream';
-import he from 'he';
 import zlib from 'zlib';
 import lockfile from 'lockfile';
 import omit from 'lodash/omit';
@@ -26,23 +25,20 @@ import pMap from 'p-map';
 import makeDir from 'make-dir';
 import { major, minor, patch, prerelease } from 'semver';
 import { generate as generateRandomString } from 'randomstring';
-import fxp from 'fast-xml-parser';
 import * as ActionTypes from './actionTypes';
 import {
+  MC_RESOURCES_URL,
+  GDL_LEGACYJAVAFIXER_MOD_URL,
+  FORGE,
+  FMLLIBS_OUR_BASE_URL,
+  FMLLIBS_FORGE_BASE_URL,
+  MICROSOFT_OAUTH_CLIENT_ID,
+  MICROSOFT_OAUTH_REDIRECT_URL,
   ACCOUNT_MICROSOFT,
   ACCOUNT_MOJANG,
   CURSEFORGE,
-  FABRIC,
-  FMLLIBS_FORGE_BASE_URL,
-  FMLLIBS_OUR_BASE_URL,
-  FORGE,
-  FTB,
-  GDL_LEGACYJAVAFIXER_MOD_URL,
-  MC_RESOURCES_URL,
   MC_STARTUP_METHODS,
-  MICROSOFT_OAUTH_CLIENT_ID,
-  MICROSOFT_OAUTH_REDIRECT_URL,
-  NEWS_URL
+  METACRAFT_SERVICES_URL
 } from '../utils/constants';
 import {
   getAddon,
@@ -67,7 +63,11 @@ import {
   msAuthenticateXSTS,
   msExchangeCodeForAccessToken,
   msMinecraftProfile,
-  msOAuthRefresh
+  msOAuthRefresh,
+  getJava16Manifest,
+  getMultipleAddons,
+  metaCraftAuthenticateRequest,
+  metaCraftLogout
 } from '../api';
 import {
   _getAccounts,
@@ -211,40 +211,6 @@ export function initManifests() {
   };
 }
 
-export function initNews() {
-  return async (dispatch, getState) => {
-    const {
-      news,
-      loading: { minecraftNews }
-    } = getState();
-    if (news.length === 0 && !minecraftNews.isRequesting) {
-      try {
-        const { data: newsXml } = await axios.get(NEWS_URL);
-        const newsArr =
-          fxp.parse(newsXml)?.rss?.channel?.item?.map(newsEntry => ({
-            title: newsEntry.title,
-            description: newsEntry.description,
-            image: `https://minecraft.net${newsEntry.imageURL}`,
-            url: newsEntry.link,
-            guid: newsEntry.guid
-          })) || [];
-        dispatch({
-          type: ActionTypes.UPDATE_NEWS,
-          news: newsArr
-            .map(v => ({
-              ...v,
-              title: he.decode(v?.title),
-              description: he.decode(v?.description)
-            }))
-            .splice(0, 10)
-        });
-      } catch (err) {
-        console.error(err.message);
-      }
-    }
-  };
-}
-
 export function updateAccount(uuidVal, account) {
   return dispatch => {
     dispatch({
@@ -351,6 +317,17 @@ export function updateDownloadProgress(percentage) {
       percentage: Number(percentage).toFixed(0)
     });
     ipcRenderer.invoke('update-progress-bar', percentage);
+  };
+}
+
+export function updateServerMetaData(metaData) {
+  return dispatch => {
+    dispatch({
+      type: ActionTypes.UPDATE_SERVER_META_DATA,
+      metaData
+    });
+
+    return metaData;
   };
 }
 
@@ -809,6 +786,75 @@ export function loginOAuth(redirect = true) {
       console.error(error);
       throw new Error(error);
     }
+  };
+}
+
+export function loginMetamask(params) {
+  return async (dispatch, getState) => {
+    const {
+      app: { isNewUser }
+    } = getState();
+    try {
+      await metaCraftAuthenticateRequest(params)
+        .then(result => {
+          if (result.error) {
+            return Promise.reject(result.errorMessage);
+          }
+
+          const {
+            data: { selectedProfile = {}, accessToken = '' }
+          } = result;
+          console.log(result);
+          console.log('selectedProfile: ', selectedProfile);
+          console.log('accessToken: ', accessToken);
+
+          const account = {
+            accountType: ACCOUNT_MOJANG,
+            address: params.address,
+            accessToken,
+            selectedProfile: {
+              id: selectedProfile.id,
+              name: selectedProfile.name
+            },
+            skin: undefined,
+            user: {
+              username: selectedProfile.name
+            }
+          };
+
+          dispatch(updateAccount(selectedProfile.id, account));
+          dispatch(updateCurrentAccountId(selectedProfile.id));
+
+          if (isNewUser) {
+            dispatch(updateIsNewUser(false));
+          }
+
+          dispatch(push('/home'));
+          return Promise.resolve(result);
+        })
+        .catch(error => {
+          console.error(error);
+          // alert(error.message);
+        });
+    } catch (error) {
+      console.error(error);
+      throw new Error(error);
+    }
+  };
+}
+
+export function logoutMetamask(params) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const {
+      address,
+      accessToken,
+      selectedProfile: { id }
+    } = _getCurrentAccount(state);
+
+    metaCraftLogout(params).catch(console.error);
+    dispatch(removeAccount(id));
+    dispatch(push('/'));
   };
 }
 
@@ -1899,7 +1945,11 @@ export function downloadInstance(instanceName) {
     );
 
     let prev = 0;
+
+    console.log(assets.length + libraries.length + 1);
+
     const updatePercentage = downloaded => {
+      console.log(downloaded);
       const percentage =
         (downloaded * 100) / (assets.length + libraries.length + 1);
 
@@ -2567,7 +2617,7 @@ export function launchInstance(instanceName) {
   return async (dispatch, getState) => {
     const state = getState();
 
-    const { userData } = state;
+    const { userData, app } = state;
     const account = _getCurrentAccount(state);
     const librariesPath = _getLibrariesPath(state);
     const assetsPath = _getAssetsPath(state);
@@ -2726,6 +2776,32 @@ export function launchInstance(instanceName) {
     const javaMem = javaMemory !== undefined ? javaMemory : memory;
     const gameResolution = instanceResolution || globalMinecraftResolution;
 
+    const injectedJvmArguments = [
+      `-javaagent:${process.cwd()}/public/authlib-injector.jar=${METACRAFT_SERVICES_URL}`,
+      `-Dauthlibinjector.yggdrasil.prefetched=${Buffer.from(
+        JSON.stringify(app.serverMetaData)
+      ).toString('base64')}`
+    ];
+
+    console.log('injectedJvmArguments: ', injectedJvmArguments);
+
+    const injectedJvmArgumentsIndex = mcJson.arguments.jvm.findIndex(
+      jvmItem => {
+        if (typeof jvmItem === 'string') {
+          return /^-Djava.library.path/.test(jvmItem);
+        }
+        return false;
+      }
+    );
+
+    mcJson.arguments.jvm.splice(
+      injectedJvmArgumentsIndex,
+      0,
+      ...injectedJvmArguments
+    );
+
+    console.log('mcJson.arguments.jvm: ', mcJson.arguments.jvm);
+
     const jvmArguments = getJvmArguments(
       libraries,
       mcMainFile,
@@ -2755,20 +2831,8 @@ export function launchInstance(instanceName) {
       replaceWith
     ];
 
-    console.log(
-      `"${javaPath}" ${getJvmArguments(
-        libraries,
-        mcMainFile,
-        instancePath,
-        assetsPath,
-        mcJson,
-        account,
-        javaMem,
-        gameResolution,
-        true,
-        javaArguments
-      ).join(' ')}`.replace(...replaceRegex)
-    );
+    console.log('javaPath: ', javaPath);
+    console.log('jvmArguments: ', jvmArguments.join(' '));
 
     if (state.settings.hideWindowOnGameLaunch) {
       await ipcRenderer.invoke('hide-window');
@@ -2782,6 +2846,8 @@ export function launchInstance(instanceName) {
         shell: true
       }
     );
+
+    console.log(jvmArguments.map(v => v.toString().replace(...replaceRegex)));
 
     const playTimer = setInterval(() => {
       dispatch(

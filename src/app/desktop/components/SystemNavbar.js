@@ -275,6 +275,7 @@ const SystemNavbar = () => {
       </Container>
       {isOsx && (
         <>
+          {/* {!isLocation('/onboarding') && <SettingsButton />} */}
           <div
             css={`
               display: flex;

@@ -33,23 +33,23 @@ const Content = ({
 
   let pages = [
     <NewInstance setVersion={setVersion} setModpack={setModpack} />,
-    <CurseForgeModpacks
-      setVersion={setVersion}
-      setStep={setStep}
-      setModpack={setModpack}
-    />,
-    <Import
-      setVersion={setVersion}
-      setModpack={setModpack}
-      importZipPath={importZipPath}
-      setImportZipPath={setImportZipPath}
-      setOverrideNextStepOnClick={setOverrideNextStepOnClick}
-    />,
-    <FTBModpacks
-      setVersion={setVersion}
-      setStep={setStep}
-      setModpack={setModpack}
-    />
+    // <CurseForgeModpacks
+    //   setVersion={setVersion}
+    //   setStep={setStep}
+    //   setModpack={setModpack}
+    // />,
+    // <Import
+    //   setVersion={setVersion}
+    //   setModpack={setModpack}
+    //   importZipPath={importZipPath}
+    //   setImportZipPath={setImportZipPath}
+    //   setOverrideNextStepOnClick={setOverrideNextStepOnClick}
+    // />,
+    // <FTBModpacks
+    //   setVersion={setVersion}
+    //   setStep={setStep}
+    //   setModpack={setModpack}
+    // />
   ];
 
   return (
@@ -92,7 +92,7 @@ const Content = ({
                     />
                     Vanilla
                   </Radio.Button>
-                  <Radio.Button value={1}>
+                  {/* <Radio.Button value={1}>
                     <img
                       src={curseForgeIcon}
                       width="20px"
@@ -103,8 +103,6 @@ const Content = ({
                     />
                     CurseForge
                   </Radio.Button>
-                  {/* <Radio.Button value={3} disabled>ATLauncher</Radio.Button>
-                  <Radio.Button value={4} disabled>Technic</Radio.Button> */}
                   <Radio.Button value={3}>
                     <img
                       src={ftbIcon}
@@ -125,7 +123,7 @@ const Content = ({
                       `}
                     />
                     Import Zip
-                  </Radio.Button>
+                  </Radio.Button> */}
                 </Radio.Group>
               </div>
               <div

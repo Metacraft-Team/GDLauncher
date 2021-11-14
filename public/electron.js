@@ -21,6 +21,10 @@ const {
   default: { fromBase64: toBase64URL }
 } = require('base64url');
 const { URL } = require('url');
+const {
+  default: installExtension,
+  REDUX_DEVTOOLS
+} = require('electron-devtools-installer');
 const murmur = require('./native/murmur2');
 const nsfw = require('./native/nsfw');
 
@@ -383,6 +387,17 @@ function createWindow() {
   mainWindow.webContents.on('new-window', handleRedirect);
 }
 
+if (isDev) {
+  app
+    .whenReady()
+    .then(() => {
+      return installExtension(REDUX_DEVTOOLS)
+        .then(name => console.log(`Added Extension:  ${name}`))
+        .catch(err => console.log('An error occurred: ', err));
+    })
+    .catch(log.error);
+}
+
 app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
@@ -414,8 +429,6 @@ app.on('activate', () => {
 
 app.on('web-contents-created', (e, webContents) => {
   webContents.on('new-window', (event, url) => {
-    console.log('========== new-window');
-
     event.preventDefault();
     shell.openExternal(url);
   });

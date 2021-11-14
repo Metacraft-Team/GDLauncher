@@ -110,6 +110,15 @@ function lastUpdateVersion(state = null, action) {
   }
 }
 
+function serverMetaData(state = {}, action) {
+  switch (action.type) {
+    case ActionTypes.UPDATE_SERVER_META_DATA:
+      return { ...state, ...action.metaData };
+    default:
+      return state;
+  }
+}
+
 export default combineReducers({
   accounts,
   currentAccountId,
@@ -121,5 +130,6 @@ export default combineReducers({
   curseforgeCategories,
   clientToken,
   isNewUser,
-  lastUpdateVersion
+  lastUpdateVersion,
+  serverMetaData
 });

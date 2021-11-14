@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import originalFs from 'original-fs';
 import fse from 'fs-extra';
+import sevenBin from '7zip-bin';
 import { extractFull } from 'node-7z';
 import jimp from 'jimp/es';
 import makeDir from 'make-dir';
@@ -336,19 +337,18 @@ export const get7zPath = async () => {
   return path.join(baseDir, '7za.exe');
 };
 
-get7zPath();
-
 export const extractAll = async (
   source,
   destination,
   args = {},
   funcs = {}
 ) => {
-  const sevenZipPath = await get7zPath();
+  // const sevenZipPath = await get7zPath();
+  const sevenZipPath = sevenBin.path7za;
   const extraction = extractFull(source, destination, {
     ...args,
     yes: true,
-    $bin: sevenZipPath,
+    $bin: '/usr/local/bin/7za',
     $spawnOptions: { shell: true }
   });
   await new Promise((resolve, reject) => {
@@ -371,14 +371,15 @@ export const extractAll = async (
 
 export const extractNatives = async (libraries, instancePath) => {
   const extractLocation = path.join(instancePath, 'natives');
+
+  const filterLibraries = libraries.filter(l => l.natives);
+
   await Promise.all(
-    libraries
-      .filter(l => l.natives)
-      .map(async l => {
-        await extractAll(l.path, extractLocation, {
-          $raw: ['-xr!META-INF']
-        });
-      })
+    filterLibraries.map(async l => {
+      await extractAll(l.path, extractLocation, {
+        $raw: ['-xr!META-INF']
+      });
+    })
   );
 };
 
