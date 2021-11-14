@@ -90,7 +90,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if (account.skin) {
+    if (account && account.skin) {
       extractFace(account.skin).then(setProfileImage).catch(console.error);
     }
   }, [account]);

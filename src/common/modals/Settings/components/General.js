@@ -195,7 +195,7 @@ const General = () => {
 
   useEffect(() => {
     ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
-    if (currentAccount.skin) {
+    if (currentAccount && currentAccount.skin) {
       extractFace(currentAccount.skin)
         .then(setProfileImage)
         .catch(console.error);

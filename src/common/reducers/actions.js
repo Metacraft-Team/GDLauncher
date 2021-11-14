@@ -797,16 +797,23 @@ export function loginMetamask(params) {
     try {
       await metaCraftAuthenticateRequest(params)
         .then(result => {
-          if (result.error) {
-            return Promise.reject(result.errorMessage);
-          }
-
           const {
-            data: { selectedProfile = {}, accessToken = '' }
+            data: {
+              selectedProfile = {},
+              accessToken = '',
+              error,
+              errorMessage
+            }
           } = result;
           console.log(result);
           console.log('selectedProfile: ', selectedProfile);
           console.log('accessToken: ', accessToken);
+
+          if (error) {
+            return Promise.reject(
+              new Error(`error: ${error}, errorMessage: ${errorMessage}`)
+            );
+          }
 
           const account = {
             accountType: ACCOUNT_MOJANG,
