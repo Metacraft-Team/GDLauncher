@@ -195,7 +195,11 @@ const General = () => {
 
   useEffect(() => {
     ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
-    extractFace(currentAccount.skin).then(setProfileImage).catch(console.error);
+    if (currentAccount.skin) {
+      extractFace(currentAccount.skin)
+        .then(setProfileImage)
+        .catch(console.error);
+    }
     ipcRenderer
       .invoke('getAppdataPath')
       .then(appData =>
