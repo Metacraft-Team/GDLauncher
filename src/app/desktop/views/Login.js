@@ -193,7 +193,6 @@ const Login = () => {
 
   useEffect(() => {
     ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
-    fetchStatus().catch(console.error);
   }, []);
 
   const openChromeWithMetamask = () => {

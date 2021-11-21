@@ -29,6 +29,8 @@ import * as ActionTypes from './actionTypes';
 import {
   MC_RESOURCES_URL,
   GDL_LEGACYJAVAFIXER_MOD_URL,
+  FABRIC,
+  VANILLA,
   FORGE,
   FMLLIBS_OUR_BASE_URL,
   FMLLIBS_FORGE_BASE_URL,
@@ -37,6 +39,7 @@ import {
   ACCOUNT_MICROSOFT,
   ACCOUNT_MOJANG,
   CURSEFORGE,
+  FTB,
   MC_STARTUP_METHODS,
   METACRAFT_SERVICES_URL
 } from '../utils/constants';
@@ -64,8 +67,6 @@ import {
   msExchangeCodeForAccessToken,
   msMinecraftProfile,
   msOAuthRefresh,
-  getJava16Manifest,
-  getMultipleAddons,
   metaCraftAuthenticateRequest,
   metaCraftLogout
 } from '../api';
