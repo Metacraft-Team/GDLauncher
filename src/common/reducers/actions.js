@@ -2783,9 +2783,11 @@ export function launchInstance(instanceName) {
     const javaArguments = (javaArgs !== undefined ? javaArgs : args).split(' ');
     const javaMem = javaMemory !== undefined ? javaMemory : memory;
     const gameResolution = instanceResolution || globalMinecraftResolution;
+    const isDev = process.env.NODE_ENV === 'development';
+    const RESOURCE_DIR = isDev ? `${process.cwd()}/public/` : process.resourcesPath;
 
     const injectedJvmArguments = [
-      `-javaagent:${process.cwd()}/public/authlib-injector.jar=${METACRAFT_SERVICES_URL}`,
+      `-javaagent:${path.join(RESOURCE_DIR, 'authlib-injector.jar')}=${METACRAFT_SERVICES_URL}`,
       `-Dauthlibinjector.yggdrasil.prefetched=${Buffer.from(
         JSON.stringify(app.serverMetaData)
       ).toString('base64')}`

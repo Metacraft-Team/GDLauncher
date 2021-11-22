@@ -133,6 +133,10 @@ const commonConfig = {
       'public/icon.png'
     ],
     extraFiles,
+    extraResources:{
+      from: 'public/authlib-injector.jar',
+      to: './'
+    },
     asar: {
       smartUnpack: false
     },
