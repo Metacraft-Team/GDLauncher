@@ -44,40 +44,41 @@ const isDev = process.env.NODE_ENV === 'development';
 const PROTOCOL = 'metacraft';
 app.setAsDefaultProtocolClient(PROTOCOL);
 
+const sendLoginParams = (urlStr) => {
+  log.log('mac 准备执行网页端调起客户端逻辑');
+  log.log('urlStr: ', urlStr);
+  const urlObj = new URL(urlStr);
+  const { searchParams } = urlObj;
+  const signature = searchParams.get('signature');
+  const address = searchParams.get('address');
+  const timestamp = searchParams.get('timestamp');
+
+  log.log(signature, address, timestamp);
+
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+    mainWindow.show();
+    log.log('mainWindow webContents send');
+    mainWindow.webContents.send('receive-metamask-login-params', {
+      signature,
+      address,
+      timestamp
+    });
+  }
+}
+
 // Prevent multiple instances
 if (gotTheLock) {
   app.on('open-url', (event, urlStr) => {
-    log.log('mac 准备执行网页端调起客户端逻辑');
-    log.log('urlStr: ', urlStr);
-    const urlObj = new URL(urlStr);
-    const { searchParams } = urlObj;
-    const signature = searchParams.get('signature');
-    const address = searchParams.get('address');
-    const timestamp = searchParams.get('timestamp');
-
-    log.log(signature, address, timestamp);
-
-    if (mainWindow) {
-      log.log('mainWindow webContents send');
-      mainWindow.webContents.send('receive-metamask-login-params', {
-        signature,
-        address,
-        timestamp
-      });
-    }
+    // for MacOS
+    sendLoginParams(urlStr);
   });
 
-  app.on('second-instance', (e, argv) => {
+  app.on('second-instance', (e, commandLine, workingDirectory) => {
     if (process.platform === 'win32') {
-      const args = process.argv.slice(1);
-      const args1 = argv.slice(1);
-      log.log([...args, ...args1]);
-      if (mainWindow) {
-        mainWindow.webContents.send('custom-protocol-event', [
-          ...args,
-          ...args1
-        ]);
-      }
+      // for Windows
+      sendLoginParams(commandLine[commandLine.length - 1]);
     }
 
     if (mainWindow) {
@@ -102,45 +103,45 @@ app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
 const edit = [
   ...(process.platform === 'darwin'
     ? [
-        {
-          label: 'GDLauncher',
-          submenu: [
-            {
-              label: 'About GDLauncher',
-              role: 'about'
-            },
-            { type: 'separator' },
-            {
-              label: 'Services',
-              role: 'services',
-              submenu: []
-            },
-            { type: 'separator' },
-            {
-              label: 'Hide GDLauncher',
-              accelerator: 'Command+H',
-              role: 'hide'
-            },
-            {
-              label: 'Hide Others',
-              accelerator: 'Command+Alt+H',
-              role: 'hideOthers'
-            },
-            {
-              label: 'Show All',
-              role: 'unhide'
-            },
-            { type: 'separator' },
-            {
-              label: 'Quit GDLauncher',
-              accelerator: 'Command+Q',
-              click: () => {
-                app.quit();
-              }
+      {
+        label: 'GDLauncher',
+        submenu: [
+          {
+            label: 'About GDLauncher',
+            role: 'about'
+          },
+          { type: 'separator' },
+          {
+            label: 'Services',
+            role: 'services',
+            submenu: []
+          },
+          { type: 'separator' },
+          {
+            label: 'Hide GDLauncher',
+            accelerator: 'Command+H',
+            role: 'hide'
+          },
+          {
+            label: 'Hide Others',
+            accelerator: 'Command+Alt+H',
+            role: 'hideOthers'
+          },
+          {
+            label: 'Show All',
+            role: 'unhide'
+          },
+          { type: 'separator' },
+          {
+            label: 'Quit GDLauncher',
+            accelerator: 'Command+Q',
+            click: () => {
+              app.quit();
             }
-          ]
-        }
-      ]
+          }
+        ]
+      }
+    ]
     : []),
   {
     label: 'Edit',
@@ -731,8 +732,7 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       `ping 127.0.0.1 -n 1 > nul & robocopy "${path.join(
         tempFolder,
         'update'
-      )}" "." /MOV /E${
-        quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
+      )}" "." /MOV /E${quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
       }
         DEL "${path.join(tempFolder, updaterVbs)}"
         DEL "%~f0"
@@ -743,9 +743,9 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       path.join(tempFolder, updaterVbs),
       `Set WshShell = CreateObject("WScript.Shell") 
           WshShell.Run chr(34) & "${path.join(
-            tempFolder,
-            updaterBat
-          )}" & Chr(34), 0
+        tempFolder,
+        updaterBat
+      )}" & Chr(34), 0
           Set WshShell = Nothing
           `
     );

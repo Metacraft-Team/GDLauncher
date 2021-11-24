@@ -8,7 +8,8 @@ const { pipeline } = require('stream');
 const fse = require('fs-extra');
 const electronBuilder = require('electron-builder');
 const dotenv = require('dotenv');
-
+const platform = process.platform
+// const platform = "win32"
 dotenv.config();
 
 const readdir = promisify(fs.readdir);
@@ -101,16 +102,16 @@ const createDeployFiles = async () => {
 
 const extraFiles = [];
 let sevenZipPath = null;
-if (process.platform === 'win32') {
+if (platform === 'win32') {
   sevenZipPath = 'node_modules/7zip-bin/win/x64/7za.exe';
   extraFiles.push({
     from: 'vcredist/',
     to: './',
     filter: '**/*'
   });
-} else if (process.platform === 'linux') {
+} else if (platform === 'linux') {
   sevenZipPath = 'node_modules/7zip-bin/linux/x64/7za';
-} else if (process.platform === 'darwin') {
+} else if (platform === 'darwin') {
   sevenZipPath = 'node_modules/7zip-bin/mac/x64/7za';
 }
 
@@ -133,7 +134,7 @@ const commonConfig = {
       'public/icon.png'
     ],
     extraFiles,
-    extraResources:{
+    extraResources: {
       from: 'public/authlib-injector.jar',
       to: './'
     },
@@ -172,9 +173,8 @@ const commonConfig = {
       entitlementsInherit: './entitlements.mac.plist'
     },
     /* eslint-disable */
-    artifactName: `${'${productName}'}-${'${os}'}-${
-      process.argv[2]
-    }.${'${ext}'}`,
+    artifactName: `${'${productName}'}-${'${os}'}-${process.argv[2]
+      }.${'${ext}'}`,
     /* eslint-enable */
     linux: {
       category: 'Game',
@@ -192,16 +192,16 @@ const commonConfig = {
       }
     ]
   },
-  ...(process.platform === 'linux' && {
+  ...(platform === 'linux' && {
     linux:
       type === 'setup'
         ? ['appimage:x64', 'zip:x64', 'deb:x64', 'rpm:x64']
         : ['snap:x64']
   }),
-  ...(process.platform === 'win32' && {
+  ...(platform === 'win32' && {
     win: [type === 'setup' ? 'nsis:x64' : 'zip:x64']
   }),
-  ...(process.platform === 'darwin' && {
+  ...(platform === 'darwin' && {
     mac: type === 'setup' ? ['dmg:x64'] : []
   })
 };
@@ -211,7 +211,7 @@ const main = async () => {
   await fse.remove(releasesFolder);
   await makeDir(deployFolder);
   await electronBuilder.build(commonConfig);
-  if (type === 'portable' && process.platform === 'win32') {
+  if (type === 'portable' && platform === 'win32') {
     await createDeployFiles();
   }
 
@@ -246,7 +246,7 @@ const main = async () => {
     }
   };
 
-  const filesToMove = allFiles[type][process.platform];
+  const filesToMove = allFiles[type][platform];
 
   await Promise.all(
     filesToMove.map(async file => {
@@ -260,7 +260,7 @@ const main = async () => {
     })
   );
 
-  await fse.remove(releasesFolder);
+  // await fse.remove(releasesFolder);
 };
 
 main().catch(err => {

@@ -343,12 +343,12 @@ export const extractAll = async (
   args = {},
   funcs = {}
 ) => {
-  // const sevenZipPath = await get7zPath();
-  const sevenZipPath = sevenBin.path7za;
+  const sevenZipPath = await get7zPath();
+  // const sevenZipPath = sevenBin.path7za;
   const extraction = extractFull(source, destination, {
     ...args,
     yes: true,
-    $bin: '/usr/local/bin/7za',
+    $bin: sevenZipPath,//'/usr/local/bin/7za',
     $spawnOptions: { shell: true }
   });
   await new Promise((resolve, reject) => {
