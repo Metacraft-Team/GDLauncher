@@ -189,18 +189,6 @@ function DesktopRoot({ store }) {
 
   useTrackIdle(location.pathname);
 
-  // useEffect(() => {
-  //   if (
-  //     modals[0] &&
-  //     modals[0].modalType === 'Settings' &&
-  //     !modals[0].unmounting
-  //   ) {
-  //     setContentStyle({ transform: 'scale(0.4)' });
-  //   } else {
-  //     setContentStyle({ transform: 'scale(1)' });
-  //   }
-  // }, [modals]);
-
   return (
     <Wrapper>
       <SystemNavbar />
