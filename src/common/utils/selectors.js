@@ -48,13 +48,10 @@ export const _getJavaPath = createSelector(
   _userData,
   (javaManifest, java, userData) => {
     // version
-    return memoize((ver = 8) => {
-      const isVersion16 = ver === 16;
-      const manifest = isVersion16
-        ? javaManifest.java16Manifest
-        : javaManifest.javaManifest;
+    return memoize(() => {
+      const manifest = javaManifest.java16Manifest;
 
-      const customJava = ver === 16 ? java.path16 : java.path;
+      const customJava = java.path16;
 
       const javaOs = convertOSToJavaFormat(process.platform);
       const javaMeta = manifest.find(

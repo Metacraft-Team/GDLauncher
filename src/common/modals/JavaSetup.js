@@ -26,25 +26,15 @@ import { UPDATE_MODAL } from '../reducers/modals/actionTypes';
 const JavaSetup = () => {
   const [step, setStep] = useState(0);
   const [choice, setChoice] = useState(null);
-  const [isJava8Downloaded, setIsJava8Downloaded] = useState(null);
   const [isJava16Downloaded, setIsJava16Downloaded] = useState(null);
-  const [java8Log, setJava8Log] = useState(null);
   const [java16Log, setJava16Log] = useState(null);
-  const javaManifest = useSelector(state => state.app.javaManifest);
   const java16Manifest = useSelector(state => state.app.java16Manifest);
   const userData = useSelector(state => state.userData);
   const manifests = {
-    java16: java16Manifest,
-    java: javaManifest
+    java16: java16Manifest
   };
 
   useEffect(() => {
-    isLatestJavaDownloaded(manifests, userData, true, 8)
-      .then(e => {
-        setIsJava8Downloaded(e?.isValid);
-        return setJava8Log(e?.log);
-      })
-      .catch(err => console.error(err));
     isLatestJavaDownloaded(manifests, userData, true, 16)
       .then(e => {
         setIsJava16Downloaded(e?.isValid);
@@ -98,9 +88,8 @@ const JavaSetup = () => {
                 justify-content: space-evenly;
                 margin-bottom: 40px;
                 opacity: 0;
-                opacity: ${isJava8Downloaded !== null &&
-                isJava16Downloaded !== null &&
-                (!isJava8Downloaded || !isJava16Downloaded) &&
+                opacity: ${isJava16Downloaded !== null &&
+                !isJava16Downloaded &&
                 '1'};
                 * > h3 {
                   border-radius: 5px;
@@ -125,15 +114,6 @@ const JavaSetup = () => {
                   }
                 `}
               >
-                {!isJava8Downloaded && isJava8Downloaded !== null && (
-                  <h3
-                    css={`
-                      margin-right: 20px;
-                    `}
-                  >
-                    Java 8
-                  </h3>
-                )}
                 {!isJava16Downloaded && isJava16Downloaded !== null && (
                   <h3>Java 16</h3>
                 )}
@@ -195,9 +175,7 @@ const JavaSetup = () => {
             </div>
             {choice === 0 ? (
               <AutomaticSetup
-                isJava8Downloaded={isJava8Downloaded}
                 isJava16Downloaded={isJava16Downloaded}
-                java8Log={java8Log}
                 java16Log={java16Log}
               />
             ) : (
@@ -318,16 +296,10 @@ const ManualSetup = ({ setStep }) => {
   );
 };
 
-const AutomaticSetup = ({
-  isJava8Downloaded,
-  isJava16Downloaded,
-  java8Log,
-  java16Log
-}) => {
+const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
   const [downloadPercentage, setDownloadPercentage] = useState(0);
   const [currentSubStep, setCurrentSubStep] = useState('Downloading Java');
   const [currentStepPercentage, setCurrentStepPercentage] = useState(0);
-  const javaManifest = useSelector(state => state.app.javaManifest);
   const java16Manifest = useSelector(state => state.app.java16Manifest);
   const userData = useSelector(state => state.userData);
   const tempFolder = useSelector(_getTempPath);
@@ -356,13 +328,10 @@ const AutomaticSetup = ({
     }
   }, []);
 
-  if (!isJava8Downloaded) javaToInstall.push(8);
-
   if (!isJava16Downloaded) javaToInstall.push(16);
 
   const installJava = async () => {
     const javaOs = convertOSToJavaFormat(process.platform);
-    const java8Meta = javaManifest.find(v => v.os === javaOs);
     const java16Meta = java16Manifest.find(v => v.os === javaOs);
 
     const totalExtractionSteps = process.platform !== 'win32' ? 2 : 1;
@@ -486,7 +455,7 @@ const AutomaticSetup = ({
     setDownloadPercentage(100);
     setCurrentStepPercentage(100);
     await new Promise(resolve => setTimeout(resolve, 2000));
-    if (!java16Log || !java8Log) dispatch(closeModal());
+    if (!java16Log) dispatch(closeModal());
   };
 
   useEffect(() => {
@@ -558,16 +527,12 @@ const AutomaticSetup = ({
               margin-bottom: 10px;
             `}
           >
-            <h3>Java 8 details:</h3>
-            <code>{java8Log}</code>
-          </div>
-          <div>
             <h3>Java 16 details:</h3>
             <code>{java16Log}</code>
           </div>
         </div>
       )}
-      {java16Log && java8Log && (
+      {java16Log && (
         <Button
           css={`
             position: absolute;

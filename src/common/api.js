@@ -275,11 +275,6 @@ export const getFabricManifest = () => {
   return axios.get(url);
 };
 
-export const getJavaManifest = () => {
-  const url = JAVA_MANIFEST_URL;
-  return axios.get(url);
-};
-
 export const getJava16Manifest = () => {
   const url = JAVA16_MANIFEST_URL;
   return axios.get(url);

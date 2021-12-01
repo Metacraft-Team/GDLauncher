@@ -60,9 +60,7 @@ function DesktopRoot({ store }) {
   const javaPath = useSelector(state => state.settings.java.path);
   const java16Path = useSelector(state => state.settings.java.path16);
   const location = useSelector(state => state.router.location);
-  // const modals = useSelector(state => state.modals);
   const shouldShowDiscordRPC = useSelector(state => state.settings.discordRPC);
-  // const [contentStyle, setContentStyle] = useState({ transform: 'scale(1)' });
 
   message.config({
     top: 45,
@@ -80,8 +78,6 @@ function DesktopRoot({ store }) {
       .catch(error => {
         console.error('get metaData failed: ', error);
       });
-
-    ipcRenderer.invoke('getAppdataPath').then(console.log).catch(console.error);
   };
 
   const init = async () => {
@@ -92,19 +88,10 @@ function DesktopRoot({ store }) {
 
     const manifests = await dispatch(initManifests());
 
-    let isJava8OK = javaPath;
-    let isJava16Ok = java16Path;
-
-    if (!javaPath) {
-      ({ isValid: isJava8OK } = await isLatestJavaDownloaded(
-        manifests,
-        userData,
-        true
-      ));
-    }
+    let isJava16Valid = java16Path;
 
     if (!java16Path) {
-      ({ isValid: isJava16Ok } = await isLatestJavaDownloaded(
+      ({ isValid: isJava16Valid } = await isLatestJavaDownloaded(
         manifests,
         userData,
         true,
@@ -112,7 +99,7 @@ function DesktopRoot({ store }) {
       ));
     }
 
-    if (!isJava8OK || !isJava16Ok) {
+    if (!isJava16Valid) {
       dispatch(openModal('JavaSetup', { preventClose: true }));
 
       // Super duper hacky solution to await the modal to be closed...
@@ -143,21 +130,14 @@ function DesktopRoot({ store }) {
       dispatch(push('/home'));
     } else if (currentAccount) {
       dispatch(
-        load(
-          features.mcAuthentication,
-          dispatch(
-            currentAccount.accountType === ACCOUNT_MICROSOFT
-              ? loginWithOAuthAccessToken()
-              : loginWithAccessToken()
-          )
-        )
-      ).catch(() => {
-        dispatch(switchToFirstValidAccount());
+        // TODO: 本地检测到有account，需要调用服务端接口，验证登录态。 替换成新接口
+        load(features.mcAuthentication, dispatch(loginWithAccessToken()))
+      ).catch(async () => {
+        const accountId = await dispatch(switchToFirstValidAccount());
+        if (accountId) {
+          dispatch(push('/home'));
+        }
       });
-    } else {
-      dispatch(
-        load(features.mcAuthentication, dispatch(loginThroughNativeLauncher()))
-      ).catch(console.error);
     }
 
     if (shouldShowDiscordRPC) {
@@ -171,7 +151,6 @@ function DesktopRoot({ store }) {
     getMetaData();
   };
 
-  // Handle already logged in account redirect
   useDidMount(init);
 
   useEffect(() => {
@@ -180,14 +159,14 @@ function DesktopRoot({ store }) {
     }
   }, [currentAccount]);
 
-  useEffect(() => {
-    if (clientToken && process.env.NODE_ENV !== 'development') {
-      ga.setUserId(clientToken);
-      ga.trackPage(location.pathname);
-    }
-  }, [location.pathname, clientToken]);
+  // useEffect(() => {
+  //   if (clientToken && process.env.NODE_ENV !== 'development') {
+  //     ga.setUserId(clientToken);
+  //     ga.trackPage(location.pathname);
+  //   }
+  // }, [location.pathname, clientToken]);
 
-  useTrackIdle(location.pathname);
+  // useTrackIdle(location.pathname);
 
   return (
     <Wrapper>

@@ -65,15 +65,6 @@ function curseforgeCategories(state = [], action) {
   }
 }
 
-function javaManifest(state = {}, action) {
-  switch (action.type) {
-    case ActionTypes.UPDATE_JAVA_MANIFEST:
-      return action.data;
-    default:
-      return state;
-  }
-}
-
 function java16Manifest(state = {}, action) {
   switch (action.type) {
     case ActionTypes.UPDATE_JAVA16_MANIFEST:
@@ -125,7 +116,6 @@ export default combineReducers({
   vanillaManifest,
   forgeManifest,
   fabricManifest,
-  javaManifest,
   java16Manifest,
   curseforgeCategories,
   clientToken,
