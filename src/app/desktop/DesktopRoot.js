@@ -81,7 +81,6 @@ function DesktopRoot({ store }) {
   };
 
   const init = async () => {
-    dispatch(requesting(features.mcAuthentication));
     const userDataStatic = await ipcRenderer.invoke('getUserData');
     const userData = dispatch(updateUserData(userDataStatic));
     await dispatch(checkClientToken());
@@ -126,7 +125,6 @@ function DesktopRoot({ store }) {
     }
 
     if (process.env.NODE_ENV === 'development' && currentAccount) {
-      dispatch(received(features.mcAuthentication));
       dispatch(push('/home'));
     } else if (currentAccount) {
       dispatch(
