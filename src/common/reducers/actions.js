@@ -765,54 +765,44 @@ export function loginMetamask(params) {
       app: { isNewUser }
     } = getState();
     try {
-      await metaCraftAuthenticateRequest(params)
-        .then(result => {
-          const {
-            data: {
-              selectedProfile = {},
-              accessToken = '',
-              error,
-              errorMessage
-            }
-          } = result;
-          console.log(result);
-          console.log('selectedProfile: ', selectedProfile);
-          console.log('accessToken: ', accessToken);
+      await metaCraftAuthenticateRequest(params).then(result => {
+        const {
+          data: { selectedProfile = {}, accessToken = '', error, errorMessage }
+        } = result;
+        console.log(result);
+        console.log('selectedProfile: ', selectedProfile);
+        console.log('accessToken: ', accessToken);
 
-          if (error) {
-            return Promise.reject(
-              new Error(`error: ${error}, errorMessage: ${errorMessage}`)
-            );
+        if (error) {
+          return Promise.reject(
+            new Error(`error: ${error}, errorMessage: ${errorMessage}`)
+          );
+        }
+
+        const account = {
+          accountType: ACCOUNT_MOJANG,
+          address: params.address,
+          accessToken,
+          selectedProfile: {
+            id: selectedProfile.id,
+            name: selectedProfile.name
+          },
+          skin: undefined,
+          user: {
+            username: selectedProfile.name
           }
+        };
 
-          const account = {
-            accountType: ACCOUNT_MOJANG,
-            address: params.address,
-            accessToken,
-            selectedProfile: {
-              id: selectedProfile.id,
-              name: selectedProfile.name
-            },
-            skin: undefined,
-            user: {
-              username: selectedProfile.name
-            }
-          };
+        dispatch(updateAccount(selectedProfile.id, account));
+        dispatch(updateCurrentAccountId(selectedProfile.id));
 
-          dispatch(updateAccount(selectedProfile.id, account));
-          dispatch(updateCurrentAccountId(selectedProfile.id));
+        if (isNewUser) {
+          dispatch(updateIsNewUser(false));
+        }
 
-          if (isNewUser) {
-            dispatch(updateIsNewUser(false));
-          }
-
-          dispatch(push('/home'));
-          return Promise.resolve(result);
-        })
-        .catch(error => {
-          console.error(error);
-          // alert(error.message);
-        });
+        dispatch(push('/home'));
+        return Promise.resolve(result);
+      });
     } catch (error) {
       console.error(error);
       throw new Error(error);

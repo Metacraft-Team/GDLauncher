@@ -36,7 +36,6 @@ import {
 } from '../../../reducers/settings/actions';
 import { updateConcurrentDownloads } from '../../../reducers/actions';
 import { openModal } from '../../../reducers/modals/actions';
-import HorizontalLogo from '../../../../ui/HorizontalLogo';
 import { extractFace } from '../../../../app/desktop/utils';
 
 const Title = styled.div`

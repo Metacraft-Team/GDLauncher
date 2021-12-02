@@ -17,7 +17,6 @@ import {
 } from '../utils/selectors';
 import { addToQueue } from '../reducers/actions';
 import { closeModal } from '../reducers/modals/actions';
-import Logo from '../../ui/Logo';
 
 const InstancesMigration = () => {
   const dispatch = useDispatch();
@@ -199,13 +198,6 @@ const InstancesMigration = () => {
       header={false}
     >
       <Container>
-        <div
-          css={`
-            margin-top: 20px;
-          `}
-        >
-          <Logo size={100} />
-        </div>
         <div
           css={`
             margin-top: 20px;

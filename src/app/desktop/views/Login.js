@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import electron, { ipcRenderer } from 'electron';
 import styled from 'styled-components';
@@ -11,16 +11,12 @@ import {
 import { Input, Button } from 'antd';
 import { useKey } from 'rooks';
 import axios from 'axios';
-import {
-  login,
-  loginOAuth,
-  loginMetamask
-} from '../../../common/reducers/actions';
-import { load, requesting } from '../../../common/reducers/loading/actions';
+import { loginMetamask } from '../../../common/reducers/actions';
+import { load } from '../../../common/reducers/loading/actions';
 import features from '../../../common/reducers/loading/features';
 import backgroundVideo from '../../../common/assets/background.webm';
-import HorizontalLogo from '../../../ui/HorizontalLogo';
 import { openModal } from '../../../common/reducers/modals/actions';
+import metaCraftLogo from '../../../common/assets/metaCraft-logo.svg';
 
 const LoginButton = styled(Button)`
   border-radius: 4px;
@@ -40,10 +36,6 @@ const LoginButton = styled(Button)`
     color: ${props => props.theme.palette.text.primary};
     background: ${props => props.theme.palette.grey[600]};
   }
-`;
-
-const MicrosoftLoginButton = styled(LoginButton)`
-  margin-top: 10px;
 `;
 
 const MetamaskLoginButton = styled(LoginButton)`
@@ -154,50 +146,21 @@ const LoginFailMessage = styled.div`
 const Login = () => {
   const dispatch = useDispatch();
   const [username, setUsername] = useState(null);
-  const [email, setEmail] = useState(null);
-  const [password, setPassword] = useState(null);
   const [version, setVersion] = useState(null);
   const [loginFailed, setLoginFailed] = useState(false);
   const loading = useSelector(
     state => state.loading.accountAuthentication.isRequesting
   );
 
-  const authenticate = () => {
-    if (!email || !password) return;
-    dispatch(requesting('accountAuthentication'));
-    setTimeout(() => {
-      dispatch(
-        load(features.mcAuthentication, dispatch(login(email, password)))
-      ).catch(e => {
-        console.error(e);
-        setLoginFailed(e);
-        setPassword(null);
-      });
-    }, 1000);
+  const openChromeWithMetamask = () => {
+    ipcRenderer.invoke('loginWithMetamask', { username });
   };
 
-  const authenticateMicrosoft = () => {
-    dispatch(requesting('accountAuthentication'));
-
-    setTimeout(() => {
-      dispatch(load(features.mcAuthentication, dispatch(loginOAuth()))).catch(
-        e => {
-          console.error(e);
-          setLoginFailed(e);
-        }
-      );
-    }, 1000);
-  };
-
-  useKey(['Enter'], authenticate);
+  useKey(['Enter'], openChromeWithMetamask);
 
   useEffect(() => {
     ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
   }, []);
-
-  const openChromeWithMetamask = () => {
-    ipcRenderer.invoke('loginWithMetamask', { username });
-  };
 
   useEffect(() => {
     ipcRenderer.on('receive-metamask-login-params', (e, params) => {
@@ -205,12 +168,20 @@ const Login = () => {
       console.log('authenticate ....');
 
       dispatch(
-        loginMetamask({
-          ...params,
-          timestamp: Number(params.timestamp),
-          username
-        })
-      );
+        load(
+          features.mcAuthentication,
+          dispatch(
+            loginMetamask({
+              ...params,
+              timestamp: Number(params.timestamp),
+              username
+            })
+          )
+        )
+      ).catch(error => {
+        console.error(error);
+        setLoginFailed(error);
+      });
     });
 
     return () => {
@@ -224,48 +195,9 @@ const Login = () => {
         <Container>
           <LeftSide transitionState={transitionState}>
             <Header>
-              <HorizontalLogo size={200} />
+              <img src={metaCraftLogo} alt="Metacraft" />
             </Header>
             <Form>
-              {/* <div>
-                <Input
-                  placeholder="Email"
-                  value={email}
-                  onChange={({ target: { value } }) => setEmail(value)}
-                />
-              </div>
-              <div>
-                <Input
-                  placeholder="Password"
-                  type="password"
-                  value={password}
-                  onChange={({ target: { value } }) => setPassword(value)}
-                />
-              </div>
-              {loginFailed && (
-                <LoginFailMessage>{loginFailed?.message}</LoginFailMessage>
-              )}
-              <LoginButton color="primary" onClick={authenticate}>
-                Sign In
-                <FontAwesomeIcon
-                  css={`
-                    margin-left: 6px;
-                  `}
-                  icon={faArrowRight}
-                />
-              </LoginButton>
-              <MicrosoftLoginButton
-                color="primary"
-                onClick={authenticateMicrosoft}
-              >
-                Sign in with Microsoft
-                <FontAwesomeIcon
-                  css={`
-                    margin-left: 6px;
-                  `}
-                  icon={faExternalLinkAlt}
-                />
-              </MicrosoftLoginButton> */}
               <div>
                 <Input
                   placeholder="username"
@@ -275,6 +207,9 @@ const Login = () => {
                   }}
                 />
               </div>
+              {loginFailed && (
+                <LoginFailMessage>{loginFailed?.message}</LoginFailMessage>
+              )}
               <MetamaskLoginButton
                 color="primary"
                 onClick={openChromeWithMetamask}

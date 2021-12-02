@@ -18,8 +18,6 @@ import {
   updateUpdateAvailable,
   isNewVersionAvailable
 } from '../../../common/reducers/actions';
-import BisectHosting from '../../../ui/BisectHosting';
-import Logo from '../../../ui/Logo';
 
 const SystemNavbar = () => {
   const dispatch = useDispatch();
@@ -159,49 +157,6 @@ const SystemNavbar = () => {
         }
       }}
     >
-      {!isOsx && (
-        <>
-          <div
-            css={`
-              cursor: auto !important;
-              -webkit-app-region: drag;
-              margin-left: 10px;
-            `}
-          >
-            <a
-              href="https://gdevs.io/"
-              rel="noopener noreferrer"
-              css={`
-                margin-top: 5px;
-                margin-right: 5px;
-                -webkit-app-region: no-drag;
-              `}
-            >
-              <Logo size={35} pointerCursor />
-            </a>
-            <DevtoolButton />
-          </div>
-          <div
-            css={`
-              display: flex;
-              height: 100%;
-            `}
-          >
-            <div
-              css={`
-                white-space: nowrap;
-              `}
-            >
-              Partnered with &nbsp;&nbsp;
-            </div>
-            <BisectHosting
-              showPointerCursor
-              onClick={() => dispatch(openModal('BisectHosting'))}
-            />
-            {/* <PulsatingCircle /> */}
-          </div>
-        </>
-      )}
       <Container os={isOsx}>
         {!isOsx ? (
           <>
@@ -266,42 +221,15 @@ const SystemNavbar = () => {
             >
               <FontAwesomeIcon icon={faWindowMinimize} />
             </div>
-            {!isLocation('/') && !isLocation('/onboarding') && (
-              <SettingsButton />
-            )}
+            {!isLocation('/') && <SettingsButton />}
             {isUpdateAvailable && <UpdateButton />}
           </>
         )}
       </Container>
       {isOsx && (
         <>
-          {/* {!isLocation('/onboarding') && <SettingsButton />} */}
-          <div
-            css={`
-              display: flex;
-              height: 100%;
-            `}
-          >
-            Partnered with &nbsp;&nbsp;
-            <BisectHosting
-              showPointerCursor
-              onClick={() => dispatch(openModal('BisectHosting'))}
-            />
-            {/* <PulsatingCircle /> */}
-          </div>
           <div>
             <DevtoolButton />
-            <a
-              href="https://gdevs.io/"
-              rel="noopener noreferrer"
-              css={`
-                margin-top: 5px;
-                margin-right: 5px;
-                -webkit-app-region: no-drag;
-              `}
-            >
-              <Logo size={35} pointerCursor />
-            </a>
           </div>
         </>
       )}
