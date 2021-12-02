@@ -1,16 +1,12 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import electron, { ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Transition } from 'react-transition-group';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowRight,
-  faExternalLinkAlt
-} from '@fortawesome/free-solid-svg-icons';
+import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons';
 import { Input, Button } from 'antd';
 import { useKey } from 'rooks';
-import axios from 'axios';
 import { loginMetamask } from '../../../common/reducers/actions';
 import { load } from '../../../common/reducers/loading/actions';
 import features from '../../../common/reducers/loading/features';
@@ -99,10 +95,7 @@ const Background = styled.div`
   }
 `;
 
-const Header = styled.div`
-  display: flex;
-  align-items: center;
-`;
+const Header = styled.div``;
 
 const Footer = styled.div`
   position: absolute;
@@ -195,7 +188,21 @@ const Login = () => {
         <Container>
           <LeftSide transitionState={transitionState}>
             <Header>
-              <img src={metaCraftLogo} alt="Metacraft" />
+              <a
+                href="https://metacraft.cc/"
+                rel="noopener noreferrer"
+                css={`
+                  margin-right: 10px;
+                  -webkit-app-region: no-drag;
+                  cursor: pointer;
+                `}
+              >
+                <img
+                  src={metaCraftLogo}
+                  alt="Metacraft"
+                  css="cursor: pointer;"
+                />
+              </a>
             </Header>
             <Form>
               <div>
