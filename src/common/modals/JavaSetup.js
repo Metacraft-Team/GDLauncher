@@ -78,7 +78,7 @@ const JavaSetup = () => {
             >
               For an optimal experience, we suggest letting us take care of java
               for you. Only manually manage java if you know what you&apos;re
-              doing, it may result in GDLauncher not working!
+              doing, it may result in Metacraft not working!
             </div>
 
             <div

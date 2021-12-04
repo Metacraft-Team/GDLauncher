@@ -125,8 +125,8 @@ const commonConfig = {
   config: {
     generateUpdatesFilesForAllChannels: true,
     npmRebuild: false,
-    productName: 'GDLauncher',
-    appId: 'org.gorilladevs.GDLauncher',
+    productName: 'Metacraft',
+    appId: 'cc.Launcher.Metacraft',
     files: [
       '!node_modules/**/*',
       'build/**/*',
@@ -186,9 +186,9 @@ const commonConfig = {
     },
     protocols: [
       {
-        name: 'gdlauncher',
+        name: 'metacraft',
         role: 'Viewer',
-        schemes: ['gdlauncher']
+        schemes: ['metacraft']
       }
     ]
   },

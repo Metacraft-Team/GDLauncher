@@ -1,8 +1,8 @@
-# GDLauncher
+# Metacraft
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) 
-[![GitHub issues](https://img.shields.io/github/issues-raw/gorilla-devs/GDLauncher.svg)](https://github.com/gorilla-devs/GDLauncher/issues) 
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/gorilla-devs/GDLauncher.svg)](https://github.com/gorilla-devs/GDLauncher/pulls) 
+[![GitHub issues](https://img.shields.io/github/issues-raw/gorilla-devs/GDLauncher.svg)](https://github.com/Metacraft-Team/Launcher/issues) 
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/gorilla-devs/GDLauncher.svg)](https://github.com/Metacraft-Team/Launcher/pulls) 
 ![Discord](https://img.shields.io/discord/398091532881756161.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/gorilla-devs/GDLauncher.svg) 
 ![](https://img.shields.io/github/release/gorilla-devs/GDLauncher.svg?style=flat)
@@ -65,7 +65,7 @@ Below you will find everything you need to know about the launcher. If you want 
 
 ## 🎮 Download
 
-To download the latest version, you can either click [here](https://github.com/gorilla-devs/GDLauncher/releases) and select the appropriate version for your operating system or visit our [website](https://gdevs.io).
+To download the latest version, you can either click [here](https://github.com/Metacraft-Team/Launcher/releases) and select the appropriate version for your operating system or visit our [website](https://gdevs.io).
 
 ## 🎨 Features
 
@@ -152,7 +152,7 @@ $ npm run release
 
 ## 🎁 Contributing
 
-You can find a list of unassigned tasks [here](https://github.com/gorilla-devs/GDLauncher/projects). Feel free to ask anything on our discord if you need help or want other tasks.
+You can find a list of unassigned tasks [here](https://github.com/Metacraft-Team/Launcher/projects). Feel free to ask anything on our discord if you need help or want other tasks.
 
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
@@ -164,7 +164,7 @@ You can find a list of unassigned tasks [here](https://github.com/gorilla-devs/G
 
 - **Davide Ceschia** - _Main Developer_ - [GorillaDevs](https://github.com/gorilla-devs)
 
-See also the list of [contributors](https://github.com/gorilla-devs/GDLauncher/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/Metacraft-Team/Launcher/contributors) who participated in this project.
 
 ## 📜 History
 

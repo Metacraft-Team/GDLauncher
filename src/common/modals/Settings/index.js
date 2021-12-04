@@ -154,7 +154,7 @@ export default function Settings() {
                 font-size: 16px;
               `}
             >
-              Support GDLauncher
+              Support Metacraft
             </span>
             <div
               css={`
@@ -169,7 +169,7 @@ export default function Settings() {
                 }
               `}
             >
-              <a href="https://ko-fi.com/gdlauncher">
+              <a href="https://twitter.com/MetaCraftCC">
                 <img
                   src={KoFiButton}
                   alt="Ko-Fi"

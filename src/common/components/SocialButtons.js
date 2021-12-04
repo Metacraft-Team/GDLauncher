@@ -38,27 +38,27 @@ const SocialButtons = () => {
         }
       `}
     >
-      <a href="https://discord.gdlauncher.com">
+      <a href="discord.gg/PvzFHa4QJd">
         <div>
           <FontAwesomeIcon icon={faDiscord} size="lg" />
         </div>
       </a>
-      <a href="https://github.com/gorilla-devs/GDLauncher">
+      <a href="https://github.com/Metacraft-Team/Launcher">
         <div>
           <FontAwesomeIcon icon={faGithub} size="lg" />
         </div>
       </a>
-      <a href="https://twitter.com/gdlauncher">
+      <a href="https://twitter.com/MetaCraftCC">
         <div>
           <FontAwesomeIcon icon={faTwitter} size="lg" />
         </div>
       </a>
-      <a href="https://facebook.com/gorilladevs">
+      <a href="https://twitter.com/MetaCraftCC">
         <div>
           <FontAwesomeIcon icon={faFacebook} size="lg" />
         </div>
       </a>
-      <a href="https://instagram.com/gdlauncher">
+      <a href="https://twitter.com/MetaCraftCC">
         <div>
           <FontAwesomeIcon icon={faInstagram} size="lg" />
         </div>

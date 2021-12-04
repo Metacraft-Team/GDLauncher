@@ -18,7 +18,7 @@ const AutoUpdatesNotAvailable = () => {
             margin-top: 20px;
           `}
         >
-          Please, update GDLauncher through your package manager or download the
+          Please, update Metacraft through your package manager or download the
           new version from our website <a href="https://gdevs.io">here</a>
         </div>
       </Container>

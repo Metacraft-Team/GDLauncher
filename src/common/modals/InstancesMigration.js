@@ -213,7 +213,7 @@ const InstancesMigration = () => {
             color: ${props => props.theme.palette.text.secondary};
           `}
         >
-          Please, do NOT close GDLauncher.
+          Please, do NOT close Metacraft.
         </div>
         <div
           css={`

@@ -56,7 +56,7 @@ const sendLoginParams = (urlStr) => {
   log.log(signature, address, timestamp);
 
   if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore();
+    if (process.platform === 'win32' && mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
     mainWindow.show();
     log.log('mainWindow webContents send');
@@ -90,8 +90,8 @@ if (gotTheLock) {
   app.quit();
 }
 
-if (!app.isDefaultProtocolClient('gdlauncher')) {
-  app.setAsDefaultProtocolClient('gdlauncher');
+if (!app.isDefaultProtocolClient('metacraft')) {
+  app.setAsDefaultProtocolClient('metacraft');
 }
 
 // This gets rid of this: https://github.com/electron/electron/issues/13186
@@ -104,10 +104,10 @@ const edit = [
   ...(process.platform === 'darwin'
     ? [
       {
-        label: 'GDLauncher',
+        label: 'Metacraft',
         submenu: [
           {
-            label: 'About GDLauncher',
+            label: 'About Metacraft',
             role: 'about'
           },
           { type: 'separator' },
@@ -118,7 +118,7 @@ const edit = [
           },
           { type: 'separator' },
           {
-            label: 'Hide GDLauncher',
+            label: 'Hide Metacraft',
             accelerator: 'Command+H',
             role: 'hide'
           },
@@ -133,7 +133,7 @@ const edit = [
           },
           { type: 'separator' },
           {
-            label: 'Quit GDLauncher',
+            label: 'Quit Metacraft',
             accelerator: 'Command+Q',
             click: () => {
               app.quit();
@@ -191,7 +191,7 @@ try {
   // Do nothing
 }
 
-app.setPath('userData', path.join(app.getPath('appData'), 'gdlauncher_next'));
+app.setPath('userData', path.join(app.getPath('appData'), 'metacraft_next'));
 
 let allowUnstableReleases = false;
 const releaseChannelExists = fss.existsSync(
@@ -343,7 +343,7 @@ function createWindow() {
   tray = new Tray(nimage);
   const trayMenuTemplate = [
     {
-      label: 'GDLauncher',
+      label: 'Metacraft',
       enabled: false
     },
     {
@@ -354,7 +354,7 @@ function createWindow() {
 
   const trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
   tray.setContextMenu(trayMenu);
-  tray.setToolTip('GDLauncher');
+  tray.setToolTip('Metacraft');
   tray.on('double-click', () => mainWindow.show());
 
   mainWindow.loadURL(
@@ -362,7 +362,7 @@ function createWindow() {
       ? 'http://localhost:3000'
       : `file://${path.join(__dirname, '../build/index.html')}`,
     {
-      userAgent: 'GDLauncher'
+      userAgent: 'Metacraft'
     }
   );
   if (isDev) {
@@ -698,8 +698,8 @@ if (process.env.REACT_APP_RELEASE_TYPE === 'setup') {
     !allowUnstableReleases && app.getVersion().includes('beta');
   autoUpdater.allowPrerelease = allowUnstableReleases;
   autoUpdater.setFeedURL({
-    owner: 'gorilla-devs',
-    repo: 'GDLauncher',
+    owner: 'Metacraft-Team',
+    repo: 'Launcher',
     provider: 'github'
   });
 
