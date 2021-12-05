@@ -14,10 +14,10 @@
     <array>
       <dict>
         <key>CFBundleURLName</key>
-        <string>GDLauncher handler</string>
+        <string>Metacraft handler</string>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>gdlauncher</string>
+          <string>metacraft</string>
         </array>
       </dict>
     </array>

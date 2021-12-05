@@ -7,8 +7,6 @@ import { ipcRenderer } from 'electron';
 import fse from 'fs-extra';
 import { useSelector, useDispatch } from 'react-redux';
 import path from 'path';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolder } from '@fortawesome/free-solid-svg-icons';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import Modal from '../components/Modal';
@@ -33,8 +31,6 @@ const JavaSetup = props => {
   const manifests = {
     java16: java16Manifest
   };
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (checkLatestJavaDownloaded) {

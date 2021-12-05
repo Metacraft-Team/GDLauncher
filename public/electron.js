@@ -56,7 +56,8 @@ const sendLoginParams = urlStr => {
   log.log(signature, address, timestamp);
 
   if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore();
+    if (process.platform === 'win32' && mainWindow.isMinimized())
+      mainWindow.restore();
     mainWindow.focus();
     mainWindow.show();
     log.log('mainWindow webContents send');
@@ -90,8 +91,8 @@ if (gotTheLock) {
   app.quit();
 }
 
-if (!app.isDefaultProtocolClient('gdlauncher')) {
-  app.setAsDefaultProtocolClient('gdlauncher');
+if (!app.isDefaultProtocolClient('metacraft')) {
+  app.setAsDefaultProtocolClient('metacraft');
 }
 
 // This gets rid of this: https://github.com/electron/electron/issues/13186
@@ -191,7 +192,7 @@ try {
   // Do nothing
 }
 
-app.setPath('userData', path.join(app.getPath('appData'), 'gdlauncher_next'));
+app.setPath('userData', path.join(app.getPath('appData'), 'metacraft_next'));
 
 let allowUnstableReleases = false;
 const releaseChannelExists = fss.existsSync(
@@ -699,8 +700,8 @@ if (process.env.REACT_APP_RELEASE_TYPE === 'setup') {
     !allowUnstableReleases && app.getVersion().includes('beta');
   autoUpdater.allowPrerelease = allowUnstableReleases;
   autoUpdater.setFeedURL({
-    owner: 'gorilla-devs',
-    repo: 'GDLauncher',
+    owner: 'Metacraft-Team',
+    repo: 'Launcher',
     provider: 'github'
   });
 

@@ -26,7 +26,7 @@ const main = async () => {
 
   try {
     const { data: releasesList } = await axios.default.get(
-      `https://api.github.com/repos/gorilla-devs/GDLauncher/releases`,
+      `https://api.github.com/repos/Metacraft-Team/Launcher/releases`,
       {
         headers: {
           Authorization: `token ${process.env.GH_ACCESS_TOKEN_RELEASES}`
@@ -59,12 +59,11 @@ const main = async () => {
             }
             const prSplit = e?.advanced?.pr && e?.advanced?.pr.split('/');
             const advanced =
-              ` ([${e?.advanced?.cm}](https://github.com/gorilla-devs/GDLauncher/commit/${e?.advanced?.cm})` +
-              `${
-                prSplit
-                  ? ` | [#${e?.advanced.pr}](https://github.com/gorilla-devs/GDLauncher/pull/${prSplit[0]}` +
-                    `${prSplit?.[1] ? `/commits/${prSplit[1]}` : ''})`
-                  : ''
+              ` ([${e?.advanced?.cm}](https://github.com/Metacraft-Team/Launcher/commit/${e?.advanced?.cm})` +
+              `${prSplit
+                ? ` | [#${e?.advanced.pr}](https://github.com/Metacraft-Team/Launcher/pull/${prSplit[0]}` +
+                `${prSplit?.[1] ? `/commits/${prSplit[1]}` : ''})`
+                : ''
               })`;
             const notes = `- **${e?.header || ''}** ${e?.content || ''}`;
             changeLog += `${notes + advanced} \n`;
@@ -75,7 +74,7 @@ const main = async () => {
     };
 
     const { data: newRelease } = await axios.default.post(
-      'https://api.github.com/repos/gorilla-devs/GDLauncher/releases',
+      'https://api.github.com/repos/Metacraft-Team/Launcher/releases',
       {
         tag_name: `v${version}`,
         name: `v${version}`,

@@ -1,4 +1,4 @@
-name: GDLauncher Next CI
+name: Metacraft Next CI
 
 on:
   push:
