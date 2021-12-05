@@ -1,6 +1,6 @@
 /* eslint-disable no-loop-func */
 import React, { useState, useEffect, memo } from 'react';
-import { Button, Progress, Input } from 'antd';
+import { Button, Progress, Input, notification } from 'antd';
 import { Transition } from 'react-transition-group';
 import styled, { useTheme } from 'styled-components';
 import { ipcRenderer } from 'electron';
@@ -23,9 +23,9 @@ import { closeModal } from '../reducers/modals/actions';
 import { updateJava16Path, updateJavaPath } from '../reducers/settings/actions';
 import { UPDATE_MODAL } from '../reducers/modals/actionTypes';
 
-const JavaSetup = () => {
-  const [step, setStep] = useState(0);
-  const [choice, setChoice] = useState(null);
+const JavaSetup = props => {
+  const { checkLatestJavaDownloaded = false } = props;
+
   const [isJava16Downloaded, setIsJava16Downloaded] = useState(null);
   const [java16Log, setJava16Log] = useState(null);
   const java16Manifest = useSelector(state => state.app.java16Manifest);
@@ -34,14 +34,18 @@ const JavaSetup = () => {
     java16: java16Manifest
   };
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    isLatestJavaDownloaded(manifests, userData, true, 16)
-      .then(e => {
-        setIsJava16Downloaded(e?.isValid);
-        return setJava16Log(e?.log);
-      })
-      .catch(err => console.error(err));
-  }, []);
+    if (checkLatestJavaDownloaded) {
+      isLatestJavaDownloaded(manifests, userData, true, 16)
+        .then(e => {
+          setIsJava16Downloaded(e?.isValid);
+          return setJava16Log(e?.log);
+        })
+        .catch(err => console.error(err));
+    }
+  }, [checkLatestJavaDownloaded]);
 
   return (
     <Modal
@@ -50,249 +54,32 @@ const JavaSetup = () => {
         height: 380px;
         width: 600px;
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
+        align-items: center;
         padding: 20px;
         position: relative;
       `}
       header={false}
     >
-      <Transition in={step === 0} timeout={200}>
-        {state => (
-          <FirstStep state={state}>
-            <div
-              css={`
-                font-size: 28px;
-                text-align: center;
-                margin-bottom: 20px;
-              `}
-            >
-              Java Setup
-            </div>
-            <div
-              css={`
-                margin-bottom: 20px;
-                font-size: 18px;
-                text-align: justify;
-              `}
-            >
-              For an optimal experience, we suggest letting us take care of java
-              for you. Only manually manage java if you know what you&apos;re
-              doing, it may result in GDLauncher not working!
-            </div>
-
-            <div
-              css={`
-                display: flex;
-                align-items: center;
-                justify-content: space-evenly;
-                margin-bottom: 40px;
-                opacity: 0;
-                opacity: ${isJava16Downloaded !== null &&
-                !isJava16Downloaded &&
-                '1'};
-                * > h3 {
-                  border-radius: 5px;
-                  padding: 2px 4px;
-                  background: ${props => props.theme.palette.colors.red};
-                }
-              `}
-            >
-              <h3>Missing Versions:</h3>
-              <div
-                css={`
-                  display: flex;
-                  align-items: center;
-                  margin-right: 40px;
-                  h3 {
-                    width: 71px;
-                    display: flex;
-                    justify-content: center;
-                    align-content: center;
-                    padding: 2px;
-                    box-sizing: content-box;
-                  }
-                `}
-              >
-                {!isJava16Downloaded && isJava16Downloaded !== null && (
-                  <h3>Java 16</h3>
-                )}
-              </div>
-            </div>
-
-            <div
-              css={`
-                & > div {
-                  display: flex;
-                  justify-content: center;
-                  margin-top: 20px;
-                }
-              `}
-            >
-              <div>
-                <Button
-                  type="primary"
-                  css={`
-                    width: 150px;
-                  `}
-                  onClick={() => {
-                    setStep(1);
-                    setChoice(0);
-                  }}
-                >
-                  Automatic Setup
-                </Button>
-              </div>
-              <div>
-                <Button
-                  type="text"
-                  css={`
-                    width: 150px;
-                  `}
-                  onClick={() => {
-                    setStep(1);
-                    setChoice(1);
-                  }}
-                >
-                  Manual Setup
-                </Button>
-              </div>
-            </div>
-          </FirstStep>
-        )}
-      </Transition>
-      <Transition in={step === 1} timeout={200}>
-        {state => (
-          <SecondStep state={state}>
-            <div
-              css={`
-                font-size: 28px;
-                text-align: center;
-                margin-bottom: 20px;
-              `}
-            >
-              {choice === 0 ? 'Automatic' : 'Manual'} Setup
-            </div>
-            {choice === 0 ? (
-              <AutomaticSetup
-                isJava16Downloaded={isJava16Downloaded}
-                java16Log={java16Log}
-              />
-            ) : (
-              <ManualSetup setStep={setStep} />
-            )}
-          </SecondStep>
-        )}
+      <Transition in timeout={200}>
+        <>
+          <div
+            css={`
+              font-size: 28px;
+              text-align: center;
+              margin-bottom: 20px;
+            `}
+          >
+            Automatic Setup
+          </div>
+          <AutomaticSetup
+            isJava16Downloaded={isJava16Downloaded}
+            java16Log={java16Log}
+          />
+        </>
       </Transition>
     </Modal>
-  );
-};
-
-const ManualSetup = ({ setStep }) => {
-  const [javaPath, setJavaPath] = useState('');
-  const [java16Path, setJava16Path] = useState('');
-  const dispatch = useDispatch();
-
-  const selectFolder = async version => {
-    const { filePaths, canceled } = await ipcRenderer.invoke('openFileDialog');
-    if (!canceled) {
-      if (version === 16) {
-        setJava16Path(filePaths[0]);
-      } else setJavaPath(filePaths[0]);
-    }
-  };
-  return (
-    <div
-      css={`
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      `}
-    >
-      <div
-        css={`
-          margin-bottom: 50px;
-          font-size: 18px;
-        `}
-      >
-        Enter the required paths to java. Java 8 will be used for all the
-        versions {'<'} 1.17, java 16 for versions {'>='} 1.17. You can also use
-        the same executable but some versions might not run.
-      </div>
-
-      <div
-        css={`
-          width: 100%;
-          display: flex;
-          margin-bottom: 10px;
-        `}
-      >
-        <Input
-          placeholder="Select your Java8 executable (MC < 1.17)"
-          onChange={e => setJavaPath(e.target.value)}
-          value={javaPath}
-        />
-        <Button
-          type="primary"
-          onClick={() => selectFolder(8)}
-          css={`
-            margin-left: 10px;
-          `}
-        >
-          <FontAwesomeIcon icon={faFolder} />
-        </Button>
-      </div>
-
-      <div
-        css={`
-          width: 100%;
-          display: flex;
-        `}
-      >
-        <Input
-          placeholder="Select your Java16 executable (MC >= 1.17)"
-          onChange={e => setJava16Path(e.target.value)}
-          value={java16Path}
-        />
-        <Button
-          type="primary"
-          onClick={() => selectFolder(16)}
-          css={`
-            margin-left: 10px;
-          `}
-        >
-          <FontAwesomeIcon icon={faFolder} />
-        </Button>
-      </div>
-
-      <div
-        css={`
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          margin-top: 45px;
-          position: absolute;
-          bottom: 0;
-        `}
-      >
-        <Button type="primary" onClick={() => setStep(0)}>
-          Go Back
-        </Button>
-        <Button
-          type="danger"
-          disabled={javaPath === '' || java16Path === ''}
-          onClick={() => {
-            dispatch(updateJavaPath(javaPath));
-            dispatch(updateJava16Path(java16Path));
-            dispatch(closeModal());
-          }}
-        >
-          Continue with custom java
-        </Button>
-      </div>
-    </div>
   );
 };
 
@@ -305,6 +92,13 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
   const tempFolder = useSelector(_getTempPath);
   const modals = useSelector(state => state.modals);
   const dispatch = useDispatch();
+
+  notification.config({
+    placement: 'topRight',
+    top: 50,
+    rtl: true,
+    duration: null
+  });
 
   const theme = useTheme();
   const javaToInstall = [];
@@ -349,7 +143,7 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
         version_data: { openjdk_version: version },
         binary_link: url,
         release_name: releaseName
-      } = javaVersion === 8 ? java8Meta : java16Meta;
+      } = java16Meta;
       const javaBaseFolder = path.join(userData, 'java');
 
       await fse.remove(path.join(javaBaseFolder, version));

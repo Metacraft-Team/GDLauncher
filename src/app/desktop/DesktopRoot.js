@@ -28,13 +28,14 @@ import RouteBackground from '../../common/components/RouteBackground';
 import ga from '../../common/utils/analytics';
 import routes from './utils/routes';
 import { _getCurrentAccount } from '../../common/utils/selectors';
-import { isLatestJavaDownloaded } from './utils';
+import { isLatestJavaDownloaded, isLocalJava16Exist } from './utils';
 import SystemNavbar from './components/SystemNavbar';
 import useTrackIdle from './utils/useTrackIdle';
 import { openModal } from '../../common/reducers/modals/actions';
 import Message from './components/Message';
 import { ACCOUNT_MICROSOFT } from '../../common/utils/constants';
 import { metaCraftServerCheck } from '../../common/api';
+import { useAutomaticSetupJava } from '../../common/hooks';
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -57,7 +58,6 @@ function DesktopRoot({ store }) {
   const dispatch = useDispatch();
   const currentAccount = useSelector(_getCurrentAccount);
   const clientToken = useSelector(state => state.app.clientToken);
-  const javaPath = useSelector(state => state.settings.java.path);
   const java16Path = useSelector(state => state.settings.java.path16);
   const location = useSelector(state => state.router.location);
   const shouldShowDiscordRPC = useSelector(state => state.settings.discordRPC);
@@ -89,7 +89,9 @@ function DesktopRoot({ store }) {
 
     let isJava16Valid = java16Path;
 
-    if (!java16Path) {
+    const isLocalJava16Valid = await isLocalJava16Exist();
+
+    if (!java16Path && !isLocalJava16Valid) {
       ({ isValid: isJava16Valid } = await isLatestJavaDownloaded(
         manifests,
         userData,
@@ -98,7 +100,7 @@ function DesktopRoot({ store }) {
       ));
     }
 
-    if (!isJava16Valid) {
+    if (!isLocalJava16Valid && !isJava16Valid) {
       dispatch(openModal('JavaSetup', { preventClose: true }));
 
       // Super duper hacky solution to await the modal to be closed...

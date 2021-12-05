@@ -595,10 +595,6 @@ const General = () => {
             margin: 10px 0;
           `}
         >
-          <HorizontalLogo
-            size={200}
-            onClick={() => dispatch(openModal('ChangeLogs'))}
-          />{' '}
           <div
             css={`
               margin-left: 10px;
