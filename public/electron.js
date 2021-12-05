@@ -345,7 +345,7 @@ function createWindow() {
   tray = new Tray(nimage);
   const trayMenuTemplate = [
     {
-      label: 'McLauncher',
+      label: 'Metacraft',
       enabled: false
     },
     {
@@ -356,7 +356,7 @@ function createWindow() {
 
   const trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
   tray.setContextMenu(trayMenu);
-  tray.setToolTip('McLauncher');
+  tray.setToolTip('Metacraft');
   tray.on('double-click', () => mainWindow.show());
 
   mainWindow.loadURL(
@@ -364,7 +364,7 @@ function createWindow() {
       ? 'http://localhost:3000'
       : `file://${path.join(__dirname, '../build/index.html')}`,
     {
-      userAgent: 'McLauncher'
+      userAgent: 'Metacraft'
     }
   );
   if (isDev) {
