@@ -17,7 +17,11 @@ import {
   isLatestJavaDownloaded
 } from '../../app/desktop/utils';
 import { _getTempPath } from '../utils/selectors';
-import { closeModal } from '../reducers/modals/actions';
+import {
+  closeModal,
+  unmountModal,
+  mountModal
+} from '../reducers/modals/actions';
 import { updateJava16Path, updateJavaPath } from '../reducers/settings/actions';
 import { UPDATE_MODAL } from '../reducers/modals/actionTypes';
 
@@ -92,31 +96,30 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
   notification.config({
     placement: 'topRight',
     top: 50,
-    rtl: true,
     duration: null
   });
 
   const theme = useTheme();
   const javaToInstall = [];
-  useEffect(() => {
-    if (javaToInstall.length > 0) {
-      const instanceManagerModalIndex = modals.findIndex(
-        x => x.modalType === 'JavaSetup'
-      );
+  // useEffect(() => {
+  //   if (javaToInstall.length > 0) {
+  //     const instanceManagerModalIndex = modals.findIndex(
+  //       x => x.modalType === 'JavaSetup'
+  //     );
 
-      dispatch({
-        type: UPDATE_MODAL,
-        modals: [
-          ...modals.slice(0, instanceManagerModalIndex),
-          {
-            modalType: 'JavaSetup',
-            modalProps: { preventClose: true }
-          },
-          ...modals.slice(instanceManagerModalIndex + 1)
-        ]
-      });
-    }
-  }, []);
+  //     dispatch({
+  //       type: UPDATE_MODAL,
+  //       modals: [
+  //         ...modals.slice(0, instanceManagerModalIndex),
+  //         {
+  //           modalType: 'JavaSetup',
+  //           modalProps: { preventClose: true }
+  //         },
+  //         ...modals.slice(instanceManagerModalIndex + 1)
+  //       ]
+  //     });
+  //   }
+  // }, []);
 
   if (!isJava16Downloaded) javaToInstall.push(16);
 
@@ -252,6 +255,28 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
     installJava();
   }, []);
 
+  useEffect(() => {
+    let description = '';
+    if (downloadPercentage < 100) {
+      description = `Total Progress: ${currentStepPercentage}%, Download Progress: ${downloadPercentage}%`;
+    } else if (currentStepPercentage < 100) {
+      description = `Total Progress: ${currentStepPercentage}%`;
+    }
+
+    notification.open({
+      key: 'Java Setup',
+      message: currentSubStep,
+      description,
+      onClick: () => {
+        dispatch(mountModal());
+      }
+    });
+
+    if (currentStepPercentage === 100) {
+      notification.destroy();
+    }
+  }, [currentSubStep, currentStepPercentage, downloadPercentage]);
+
   return (
     <div
       css={`
@@ -335,34 +360,19 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
           Close
         </Button>
       )}
+      <Button
+        css={`
+          position: absolute;
+          bottom: 0;
+          right: 0;
+        `}
+        type="primary"
+        onClick={() => dispatch(unmountModal())}
+      >
+        最小化
+      </Button>
     </div>
   );
 };
 
 export default memo(JavaSetup);
-
-const FirstStep = styled.div`
-  transition: 0.2s ease-in-out;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  will-change: transform;
-  transform: translateX(
-    ${({ state }) => (state === 'exiting' || state === 'exited' ? -100 : 0)}%
-  );
-`;
-
-const SecondStep = styled.div`
-  transition: 0.2s ease-in-out;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  will-change: transform;
-  transform: translateX(
-    ${({ state }) => (state === 'entering' || state === 'entered' ? 0 : 101)}%
-  );
-`;

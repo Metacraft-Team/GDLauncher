@@ -101,6 +101,7 @@ const ModalContainer = ({
 
   useEffect(() => {
     if (unmounting) unMountStyle();
+    else mountStyle();
   }, [unmounting]);
 
   const back = () => {
@@ -123,7 +124,7 @@ const ModalContainer = ({
   const unMountStyle = () => {
     // css for unmount animation
     setModalStyle({
-      opacity: 1
+      opacity: 0
     });
     setBgStyle({
       background: 'rgba(0, 0, 0, 0.70)',
