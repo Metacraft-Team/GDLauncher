@@ -550,6 +550,7 @@ export const getJVMArguments113 = (
   args.push(`-Xmx${memory}m`);
   args.push(`-Xms${memory}m`);
   args.push(`-Dminecraft.applet.TargetDirectory="${instancePath}"`);
+  args.push(`-Dlog4j2.formatMsgNoLookups=true`);
   args.push(...jvmOptions);
 
   // Eventually inject additional arguments (from 1.17 (?))
