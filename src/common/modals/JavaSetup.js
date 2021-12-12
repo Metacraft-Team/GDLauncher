@@ -71,7 +71,7 @@ const JavaSetup = props => {
               margin-bottom: 20px;
             `}
           >
-            Automatic Setup
+            Java Setup
           </div>
           <AutomaticSetup
             isJava16Downloaded={isJava16Downloaded}
@@ -255,28 +255,6 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
     installJava();
   }, []);
 
-  useEffect(() => {
-    let description = '';
-    if (downloadPercentage < 100) {
-      description = `Total Progress: ${currentStepPercentage}%, Download Progress: ${downloadPercentage}%`;
-    } else if (currentStepPercentage < 100) {
-      description = `Total Progress: ${currentStepPercentage}%`;
-    }
-
-    notification.open({
-      key: 'Java Setup',
-      message: currentSubStep,
-      description,
-      onClick: () => {
-        dispatch(mountModal());
-      }
-    });
-
-    if (currentStepPercentage === 100) {
-      notification.destroy();
-    }
-  }, [currentSubStep, currentStepPercentage, downloadPercentage]);
-
   return (
     <div
       css={`
@@ -360,17 +338,6 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
           Close
         </Button>
       )}
-      <Button
-        css={`
-          position: absolute;
-          bottom: 0;
-          right: 0;
-        `}
-        type="primary"
-        onClick={() => dispatch(unmountModal())}
-      >
-        最小化
-      </Button>
     </div>
   );
 };

@@ -1275,7 +1275,6 @@ export function downloadInstance(instanceName) {
     console.log(assets.length + libraries.length + 1);
 
     const updatePercentage = downloaded => {
-      console.log(downloaded);
       const percentage =
         (downloaded * 100) / (assets.length + libraries.length + 1);
 

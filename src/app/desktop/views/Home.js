@@ -15,6 +15,12 @@ import {
 } from '../../../common/utils/selectors';
 import { extractFace } from '../utils';
 import { updateLastUpdateVersion } from '../../../common/reducers/actions';
+import { useAddFabricInstance } from '../../../common/hooks';
+import {
+  FABRIC,
+  MC_VERSION,
+  FABRIC_LOADER_VERSION
+} from '../../../common/utils/constants';
 
 const AddInstanceIcon = styled(Button)`
   position: fixed;
@@ -34,6 +40,13 @@ const Home = () => {
   const dispatch = useDispatch();
   const account = useSelector(_getCurrentAccount);
   const lastUpdateVersion = useSelector(state => state.app.lastUpdateVersion);
+  const createInstance = useAddFabricInstance({
+    instanceVersion: {
+      loaderType: FABRIC,
+      loaderVersion: FABRIC_LOADER_VERSION,
+      mcVersion: MC_VERSION
+    }
+  });
 
   const openAddInstanceModal = defaultPage => {
     dispatch(openModal('AddInstance', { defaultPage }));
@@ -55,6 +68,8 @@ const Home = () => {
     };
 
     init();
+
+    createInstance();
   }, []);
 
   useEffect(() => {
@@ -66,9 +81,9 @@ const Home = () => {
   return (
     <div>
       <Instances />
-      <AddInstanceIcon type="primary" onClick={() => openAddInstanceModal(0)}>
+      {/* <AddInstanceIcon type="primary" onClick={() => openAddInstanceModal(0)}>
         <FontAwesomeIcon icon={faPlus} />
-      </AddInstanceIcon>
+      </AddInstanceIcon> */}
       <AccountContainer type="primary" onClick={openAccountModal}>
         {profileImage ? (
           <img
