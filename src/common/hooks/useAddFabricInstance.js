@@ -22,20 +22,20 @@ const useAddFabricInstance = ({
   importZipPath = ''
 }) => {
   const version = instanceVersion;
+  // const mcName = (
+  //   modpack?.name.replace(/\W/g, ' ') ||
+  //   (version && `Minecraft ${version?.loaderType}`) ||
+  //   ''
+  // ).trim();
 
-  const mcName = (
-    modpack?.name.replace(/\W/g, ' ') ||
-    (version && `Minecraft ${version?.loaderType}`) ||
-    ''
-  ).trim();
+  const mcName = 'Metacraft';
+
   const originalMcName =
     modpack?.name || (version && `Minecraft ${version?.loaderType}`);
   const dispatch = useDispatch();
   const instancesPath = useSelector(_getInstancesPath);
   const tempPath = useSelector(_getTempPath);
   const forgeManifest = useSelector(state => state.app.forgeManifest);
-  const [alreadyExists, setAlreadyExists] = useState(false);
-  const [invalidName, setInvalidName] = useState(true);
 
   const imageURL = useMemo(() => {
     if (!modpack) return null;
