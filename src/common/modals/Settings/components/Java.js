@@ -157,7 +157,9 @@ export default function MyAccountPreferences() {
             margin-left: 30px;
           `}
           onClick={() => {
-            dispatch(openModal('JavaSetup'));
+            dispatch(
+              openModal('JavaSetup', { checkLatestJavaDownloaded: true })
+            );
           }}
         >
           Run Java Setup again

@@ -10,6 +10,8 @@ import { ipcRenderer } from 'electron';
 import path from 'path';
 import crypto from 'crypto';
 import { exec, spawn } from 'child_process';
+import { constant } from 'lodash';
+import semver from 'semver';
 import {
   MC_LIBRARIES_URL,
   FABRIC,
@@ -262,6 +264,23 @@ export const getFilteredVersions = (
   return versions;
 };
 
+export const isLocalJava16Exist = async () => {
+  try {
+    const log = await promisify(exec)(`java -version`);
+
+    const javaVersionRegexp = /java\s+version\s+"(\S+)"/;
+
+    const [, version] = log?.stderr.match(javaVersionRegexp);
+
+    const isValid = semver.gte(version, '16.0.0');
+
+    return isValid;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+};
+
 export const isLatestJavaDownloaded = async (
   meta,
   userData,
@@ -348,7 +367,7 @@ export const extractAll = async (
   const extraction = extractFull(source, destination, {
     ...args,
     yes: true,
-    $bin: sevenZipPath,//'/usr/local/bin/7za',
+    $bin: sevenZipPath, // '/usr/local/bin/7za',
     $spawnOptions: { shell: true }
   });
   await new Promise((resolve, reject) => {
@@ -531,6 +550,7 @@ export const getJVMArguments113 = (
   args.push(`-Xmx${memory}m`);
   args.push(`-Xms${memory}m`);
   args.push(`-Dminecraft.applet.TargetDirectory="${instancePath}"`);
+  args.push(`-Dlog4j2.formatMsgNoLookups=true`);
   args.push(...jvmOptions);
 
   // Eventually inject additional arguments (from 1.17 (?))

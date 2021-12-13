@@ -13,7 +13,6 @@ const Overlay = styled.div`
   right: 0;
   backdrop-filter: blur(4px);
   will-change: opacity;
-  transition: opacity 300ms cubic-bezier(0.165, 0.84, 0.44, 1);
   z-index: 1000;
 `;
 
@@ -26,9 +25,7 @@ const Modal = styled.div`
   justify-content: center;
   align-items: center;
   background: transparent;
-  transition: transform 300ms;
   will-change: transform;
-  transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
   z-index: 1001;
 `;
 
@@ -101,6 +98,7 @@ const ModalContainer = ({
 
   useEffect(() => {
     if (unmounting) unMountStyle();
+    else mountStyle();
   }, [unmounting]);
 
   const back = () => {
@@ -123,7 +121,7 @@ const ModalContainer = ({
   const unMountStyle = () => {
     // css for unmount animation
     setModalStyle({
-      opacity: 1
+      opacity: 0
     });
     setBgStyle({
       background: 'rgba(0, 0, 0, 0.70)',

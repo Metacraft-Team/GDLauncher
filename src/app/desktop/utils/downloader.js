@@ -41,6 +41,7 @@ export const downloadInstanceFiles = async (
         }
       } while (!res && counter < 3);
       downloaded += 1;
+      console.log('downloaded: ', downloaded);
       if (
         (updatePercentage && downloaded % 5 === 0) ||
         downloaded === arr.length

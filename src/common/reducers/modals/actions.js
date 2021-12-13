@@ -1,4 +1,9 @@
-import { OPEN_MODAL, CLOSE_MODAL, UNMOUNTING_MODAL } from './actionTypes';
+import {
+  OPEN_MODAL,
+  CLOSE_MODAL,
+  UNMOUNTING_MODAL,
+  MOUNTING_MODAL
+} from './actionTypes';
 
 export function openModal(modalType, modalProps = {}) {
   return dispatch => {
@@ -22,6 +27,22 @@ export function closeModal() {
         }),
       220
     );
+  };
+}
+
+export function unmountModal() {
+  return dispatch => {
+    dispatch({
+      type: UNMOUNTING_MODAL
+    });
+  };
+}
+
+export function mountModal() {
+  return dispatch => {
+    dispatch({
+      type: MOUNTING_MODAL
+    });
   };
 }
 

@@ -24,6 +24,9 @@ export const FABRIC = 'fabric';
 export const FORGE = 'forge';
 export const VANILLA = 'vanilla';
 
+export const FABRIC_LOADER_VERSION = '0.12.11';
+export const MC_VERSION = '1.17.1';
+
 export const CURSEFORGE = 'curseforge';
 export const FTB = 'ftb';
 

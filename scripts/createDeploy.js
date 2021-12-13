@@ -8,7 +8,8 @@ const { pipeline } = require('stream');
 const fse = require('fs-extra');
 const electronBuilder = require('electron-builder');
 const dotenv = require('dotenv');
-const platform = process.platform
+
+const { platform } = process;
 // const platform = "win32"
 dotenv.config();
 

@@ -44,7 +44,7 @@ const isDev = process.env.NODE_ENV === 'development';
 const PROTOCOL = 'metacraft';
 app.setAsDefaultProtocolClient(PROTOCOL);
 
-const sendLoginParams = (urlStr) => {
+const sendLoginParams = urlStr => {
   log.log('mac 准备执行网页端调起客户端逻辑');
   log.log('urlStr: ', urlStr);
   const urlObj = new URL(urlStr);
@@ -56,7 +56,8 @@ const sendLoginParams = (urlStr) => {
   log.log(signature, address, timestamp);
 
   if (mainWindow) {
-    if (process.platform === 'win32' && mainWindow.isMinimized()) mainWindow.restore();
+    if (process.platform === 'win32' && mainWindow.isMinimized())
+      mainWindow.restore();
     mainWindow.focus();
     mainWindow.show();
     log.log('mainWindow webContents send');
@@ -66,7 +67,7 @@ const sendLoginParams = (urlStr) => {
       timestamp
     });
   }
-}
+};
 
 // Prevent multiple instances
 if (gotTheLock) {
@@ -103,45 +104,45 @@ app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
 const edit = [
   ...(process.platform === 'darwin'
     ? [
-      {
-        label: 'Metacraft',
-        submenu: [
-          {
-            label: 'About Metacraft',
-            role: 'about'
-          },
-          { type: 'separator' },
-          {
-            label: 'Services',
-            role: 'services',
-            submenu: []
-          },
-          { type: 'separator' },
-          {
-            label: 'Hide Metacraft',
-            accelerator: 'Command+H',
-            role: 'hide'
-          },
-          {
-            label: 'Hide Others',
-            accelerator: 'Command+Alt+H',
-            role: 'hideOthers'
-          },
-          {
-            label: 'Show All',
-            role: 'unhide'
-          },
-          { type: 'separator' },
-          {
-            label: 'Quit Metacraft',
-            accelerator: 'Command+Q',
-            click: () => {
-              app.quit();
+        {
+          label: 'GDLauncher',
+          submenu: [
+            {
+              label: 'About GDLauncher',
+              role: 'about'
+            },
+            { type: 'separator' },
+            {
+              label: 'Services',
+              role: 'services',
+              submenu: []
+            },
+            { type: 'separator' },
+            {
+              label: 'Hide GDLauncher',
+              accelerator: 'Command+H',
+              role: 'hide'
+            },
+            {
+              label: 'Hide Others',
+              accelerator: 'Command+Alt+H',
+              role: 'hideOthers'
+            },
+            {
+              label: 'Show All',
+              role: 'unhide'
+            },
+            { type: 'separator' },
+            {
+              label: 'Quit GDLauncher',
+              accelerator: 'Command+Q',
+              click: () => {
+                app.quit();
+              }
             }
-          }
-        ]
-      }
-    ]
+          ]
+        }
+      ]
     : []),
   {
     label: 'Edit',
@@ -338,6 +339,7 @@ function createWindow() {
 
   const iconPath = path.join(RESOURCE_DIR, 'logo_32x32.png');
 
+  log.log('iconPath: ', iconPath);
   const nimage = nativeImage.createFromPath(iconPath);
 
   tray = new Tray(nimage);
@@ -732,7 +734,8 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       `ping 127.0.0.1 -n 1 > nul & robocopy "${path.join(
         tempFolder,
         'update'
-      )}" "." /MOV /E${quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
+      )}" "." /MOV /E${
+        quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
       }
         DEL "${path.join(tempFolder, updaterVbs)}"
         DEL "%~f0"
@@ -743,9 +746,9 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       path.join(tempFolder, updaterVbs),
       `Set WshShell = CreateObject("WScript.Shell") 
           WshShell.Run chr(34) & "${path.join(
-        tempFolder,
-        updaterBat
-      )}" & Chr(34), 0
+            tempFolder,
+            updaterBat
+          )}" & Chr(34), 0
           Set WshShell = Nothing
           `
     );
