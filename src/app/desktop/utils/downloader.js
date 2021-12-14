@@ -70,6 +70,7 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
     const { data } = await axios.get(url, {
       responseType: 'stream',
       responseEncoding: null,
+      timeout: 60000,
       adapter
     });
     const wStream = fss.createWriteStream(fileName, {
