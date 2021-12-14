@@ -28,7 +28,7 @@ export const downloadInstanceFiles = async (
         if (counter !== 1) {
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
-
+        console.log('downloaded: ', downloaded, item.url);
         try {
           res = await downloadFileInstance(
             item.path,
@@ -39,9 +39,8 @@ export const downloadInstanceFiles = async (
         } catch {
           // Do nothing
         }
-      } while (!res && counter < 3);
+      } while (!res && counter < 10);
       downloaded += 1;
-      console.log('downloaded: ', downloaded);
       if (
         (updatePercentage && downloaded % 5 === 0) ||
         downloaded === arr.length
