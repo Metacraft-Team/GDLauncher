@@ -4,6 +4,8 @@ import axios from 'axios';
 import pMap from 'p-map';
 import path from 'path';
 import adapter from 'axios/lib/adapters/http';
+import http from 'http';
+import https from 'https';
 import computeFileHash from './computeFileHash';
 
 const fs = fss.promises;
@@ -70,6 +72,8 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
     const { data } = await axios.get(url, {
       responseType: 'stream',
       responseEncoding: null,
+      httpAgent: new http.Agent({ keepAlive: true, timeout: 10000 }),
+      httpsAgent: new https.Agent({ keepAlive: true, timeout: 10000 }),
       timeout: 60000,
       adapter
     });
