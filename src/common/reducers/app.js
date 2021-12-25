@@ -110,6 +110,15 @@ function serverMetaData(state = {}, action) {
   }
 }
 
+function extraDependencies(state = {}, action) {
+  switch (action.type) {
+    case ActionTypes.UPDATE_EXTRA_DEPENDENCIES:
+      return action.data;
+    default:
+      return state;
+  }
+}
+
 export default combineReducers({
   accounts,
   currentAccountId,
@@ -121,5 +130,6 @@ export default combineReducers({
   clientToken,
   isNewUser,
   lastUpdateVersion,
-  serverMetaData
+  serverMetaData,
+  extraDependencies
 });

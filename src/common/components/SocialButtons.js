@@ -1,8 +1,6 @@
 import {
   faDiscord,
-  faFacebook,
   faGithub,
-  faInstagram,
   faTwitter
 } from '@fortawesome/free-brands-svg-icons';
 import { faGlobe } from '@fortawesome/free-solid-svg-icons';
@@ -51,16 +49,6 @@ const SocialButtons = () => {
       <a href="https://twitter.com/MetaCraftCC">
         <div>
           <FontAwesomeIcon icon={faTwitter} size="lg" />
-        </div>
-      </a>
-      <a href="https://twitter.com/MetaCraftCC">
-        <div>
-          <FontAwesomeIcon icon={faFacebook} size="lg" />
-        </div>
-      </a>
-      <a href="https://twitter.com/MetaCraftCC">
-        <div>
-          <FontAwesomeIcon icon={faInstagram} size="lg" />
         </div>
       </a>
       <a href="https://gdevs.io">

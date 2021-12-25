@@ -7,7 +7,6 @@ import fse from 'fs-extra';
 import coerce from 'semver/functions/coerce';
 import gte from 'semver/functions/gte';
 import lt from 'semver/functions/lt';
-import lte from 'semver/functions/lte';
 import gt from 'semver/functions/gt';
 import log from 'electron-log';
 import { pipeline } from 'stream';
@@ -29,10 +28,7 @@ import {
   MC_RESOURCES_URL,
   GDL_LEGACYJAVAFIXER_MOD_URL,
   FABRIC,
-  VANILLA,
   FORGE,
-  FMLLIBS_OUR_BASE_URL,
-  FMLLIBS_FORGE_BASE_URL,
   MICROSOFT_OAUTH_CLIENT_ID,
   MICROSOFT_OAUTH_REDIRECT_URL,
   ACCOUNT_MICROSOFT,
@@ -50,12 +46,10 @@ import {
   getAddonsByFingerprint,
   getFabricJson,
   getFabricManifest,
-  getForgeManifest,
   getFTBModpackVersionData,
   getJava16Manifest,
-  getJavaManifest,
   getMcManifest,
-  getMultipleAddons,
+  getMcExtraDependency,
   mcAuthenticate,
   mcInvalidate,
   mcRefresh,
@@ -103,10 +97,9 @@ import {
   isInstanceFolderPath,
   isMod,
   librariesMapper,
-  mavenToArray,
   normalizeModData,
-  patchForge113,
-  reflect
+  reflect,
+  computeFileHash
 } from '../../app/desktop/utils';
 import {
   downloadFile,
@@ -116,7 +109,6 @@ import { getFileMurmurHash2, removeDuplicates } from '../utils';
 import { UPDATE_CONCURRENT_DOWNLOADS } from './settings/actionTypes';
 import { UPDATE_MODAL } from './modals/actionTypes';
 import PromiseQueue from '../../app/desktop/utils/PromiseQueue';
-import fmlLibsMapping from '../../app/desktop/utils/fmllibs';
 import { openModal } from './modals/actions';
 
 export function initManifests() {
@@ -141,6 +133,16 @@ export function initManifests() {
       });
       return fabric;
     };
+
+    const getMcExtraDependencies = async () => {
+      const extraDependency = (await getMcExtraDependency()).data;
+      dispatch({
+        type: ActionTypes.UPDATE_EXTRA_DEPENDENCIES,
+        data: extraDependency
+      });
+      return extraDependency;
+    };
+
     const getJava16ManifestVersions = async () => {
       const java = (await getJava16Manifest()).data;
       dispatch({
@@ -158,10 +160,11 @@ export function initManifests() {
       return curseforgeCategories;
     };
     // Using reflect to avoid rejection
-    const [fabric, java16, categories] = await Promise.all([
+    const [fabric, java16, categories, extraDependencies] = await Promise.all([
       reflect(getFabricVersions()),
       reflect(getJava16ManifestVersions()),
-      reflect(getAddonCategoriesVersions())
+      reflect(getAddonCategoriesVersions()),
+      reflect(getMcExtraDependencies())
     ]);
 
     if (fabric.e || categories.e) {
@@ -172,7 +175,8 @@ export function initManifests() {
       mc: mc || app.vanillaManifest,
       fabric: fabric.status ? fabric.v : app.fabricManifest,
       java16: java16.status ? java16.v : app.java16Manifest,
-      categories: categories.status ? categories.v : app.curseforgeCategories
+      categories: categories.status ? categories.v : app.curseforgeCategories,
+      extraDependencies
     };
   };
 }
@@ -1142,6 +1146,83 @@ export function addNextInstanceToCurrentDownload() {
   };
 }
 
+export function downloadExtraDependencies(instanceName) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const {
+      app: {
+        extraDependencies: {
+          mods: modsJson,
+          resourcepacks: resourcepacksJson,
+          shaderpacks: shaderpacksJson
+        }
+      }
+    } = state;
+
+    dispatch(
+      updateDownloadStatus(instanceName, 'Downloading extra dependencies...')
+    );
+
+    const mods = Object.keys(modsJson).map(key => {
+      return {
+        path: path.join(_getInstancesPath(state), instanceName, 'mods', key),
+        url: modsJson[key].url,
+        version: modsJson[key].version
+      };
+    });
+
+    const resourcepacks = Object.keys(resourcepacksJson).map(key => {
+      return {
+        path: path.join(
+          _getInstancesPath(state),
+          instanceName,
+          'resourcepacks',
+          key
+        ),
+        url: resourcepacksJson[key].url,
+        version: resourcepacksJson[key].version
+      };
+    });
+
+    const shaderpacks = Object.keys(shaderpacksJson).map(async key => {
+      const fileName = path.join(
+        _getInstancesPath(state),
+        instanceName,
+        'shaderpacks',
+        key
+      );
+
+      return {
+        path: fileName,
+        url: shaderpacksJson[key].url,
+        version: shaderpacksJson[key].version
+      };
+    });
+
+    console.log('mods: ', mods);
+    console.log('resourcepacks: ', resourcepacks);
+    console.log('shaderpacks: ', shaderpacks);
+
+    const dependencies = [...mods, ...resourcepacks, shaderpacks];
+
+    let prev = 0;
+    const updatePercentage = downloaded => {
+      const percentage = (downloaded * 100) / dependencies.length;
+      const progress = parseInt(percentage, 10);
+      if (progress !== prev) {
+        prev = progress;
+        dispatch(updateDownloadProgress(progress));
+      }
+    };
+
+    await downloadInstanceFiles(
+      dependencies,
+      updatePercentage,
+      state.settings.concurrentDownloads
+    );
+  };
+}
+
 export function downloadFabric(instanceName) {
   return async (dispatch, getState) => {
     const state = getState();
@@ -1309,6 +1390,8 @@ export function downloadInstance(instanceName) {
     if (loader?.loaderType === FABRIC) {
       await dispatch(downloadFabric(instanceName));
     }
+
+    await dispatch(downloadExtraDependencies(instanceName));
 
     dispatch(updateDownloadProgress(0));
 

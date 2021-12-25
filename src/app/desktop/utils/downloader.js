@@ -30,7 +30,6 @@ export const downloadInstanceFiles = async (
         if (counter !== 1) {
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
-        console.log('downloaded: ', downloaded, item.url);
         try {
           res = await downloadFileInstance(
             item.path,
@@ -38,8 +37,14 @@ export const downloadInstanceFiles = async (
             item.sha1,
             item.legacyPath
           );
-        } catch {
-          // Do nothing
+
+          if (res) {
+            console.log('downloaded: ', downloaded + 1, item.url);
+          } else if (counter === 10) {
+            console.log('downloaded failed: ', item.url);
+          }
+        } catch (e) {
+          console.log(e);
         }
       } while (!res && counter < 10);
       downloaded += 1;
@@ -61,6 +66,9 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
       if (legacyPath) await fs.access(legacyPath);
       const checksum = await computeFileHash(fileName);
       const legacyChecksum = legacyPath && (await computeFileHash(legacyPath));
+      if (!sha1) {
+        return true;
+      }
       if (checksum === sha1 && (!legacyPath || legacyChecksum === sha1)) {
         return true;
       }

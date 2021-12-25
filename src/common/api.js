@@ -265,6 +265,11 @@ export const getMcManifest = () => {
   return axios.get(url);
 };
 
+export const getMcExtraDependency = () => {
+  const url = `https://api.test.metacraft.cc/configs/dependency.json?timestamp=${new Date().getTime()}`;
+  return axios.get(url);
+};
+
 export const getForgeManifest = () => {
   const url = `https://files.minecraftforge.net/net/minecraftforge/forge/maven-metadata.json?timestamp=${new Date().getTime()}`;
   return axios.get(url);
