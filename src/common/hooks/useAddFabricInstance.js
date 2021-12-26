@@ -3,7 +3,8 @@ import path from 'path';
 import os from 'os';
 import fse from 'fs-extra';
 import { useSelector, useDispatch } from 'react-redux';
-import { addToQueue } from '../reducers/actions';
+import isBoolean from 'lodash/isBoolean';
+import { addToQueue, downloadExtraDependencies } from '../reducers/actions';
 import { closeModal, openModal } from '../reducers/modals/actions';
 import {
   downloadAddonZip,
@@ -33,6 +34,7 @@ const useAddFabricInstance = ({
   const originalMcName =
     modpack?.name || (version && `Minecraft ${version?.loaderType}`);
   const dispatch = useDispatch();
+  const extraDependencies = useSelector(state => state.app.extraDependencies);
   const instancesPath = useSelector(_getInstancesPath);
   const tempPath = useSelector(_getTempPath);
   const forgeManifest = useSelector(state => state.app.forgeManifest);
@@ -81,13 +83,33 @@ const useAddFabricInstance = ({
     }
   };
 
+  const checkExtraDependenciesUpgrade = () => {
+    return Object.keys(extraDependencies).some(key => {
+      return Object.keys(extraDependencies[key]).some(fileKey => {
+        return isBoolean(extraDependencies[key][fileKey].needUpgrade)
+          ? extraDependencies[key][fileKey].needUpgrade
+          : true;
+      });
+    });
+  };
+
   const createInstance = async () => {
     const localInstanceName = mcName;
 
     if (!version || !localInstanceName) return;
 
     const isExists = await isInstanceAlreadyExists();
-    if (isExists) return;
+    if (isExists) {
+      if (checkExtraDependenciesUpgrade()) {
+        await dispatch(
+          downloadExtraDependencies(
+            localInstanceName,
+            'Upgrading game files...'
+          )
+        );
+      }
+      return;
+    }
 
     const initTimestamp = Date.now();
 

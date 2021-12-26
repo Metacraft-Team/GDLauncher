@@ -388,16 +388,27 @@ export const extractAll = async (
   return extraction;
 };
 
-export const extractNatives = async (libraries, instancePath) => {
+export const extractNatives = async (
+  libraries,
+  instancePath,
+  updatePercentage = () => {}
+) => {
   const extractLocation = path.join(instancePath, 'natives');
 
   const filterLibraries = libraries.filter(l => l.natives);
 
   await Promise.all(
     filterLibraries.map(async l => {
-      await extractAll(l.path, extractLocation, {
-        $raw: ['-xr!META-INF']
-      });
+      await extractAll(
+        l.path,
+        extractLocation,
+        {
+          $raw: ['-xr!META-INF']
+        },
+        {
+          progress: updatePercentage
+        }
+      );
     })
   );
 };

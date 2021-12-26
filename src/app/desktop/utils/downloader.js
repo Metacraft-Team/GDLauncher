@@ -13,7 +13,8 @@ const fs = fss.promises;
 export const downloadInstanceFiles = async (
   arr,
   updatePercentage,
-  threads = 4
+  threads = 4,
+  updatePercentageThreshold = 5
 ) => {
   let downloaded = 0;
   await pMap(
@@ -21,6 +22,14 @@ export const downloadInstanceFiles = async (
     async item => {
       let counter = 0;
       let res = false;
+      if (!item.url && item.path) {
+        try {
+          await fs.rm(item.path);
+        } catch (e) {
+          console.log(`remove ${item.path} error: `, e);
+        }
+      }
+
       if (!item.path || !item.url) {
         console.warn('Skipping', item);
         return;
@@ -31,6 +40,8 @@ export const downloadInstanceFiles = async (
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
         try {
+          console.log('downloading: ', item.url);
+
           res = await downloadFileInstance(
             item.path,
             item.url,
@@ -39,9 +50,9 @@ export const downloadInstanceFiles = async (
           );
 
           if (res) {
-            console.log('downloaded: ', downloaded + 1, item.url);
+            console.log('downloaded success: ', downloaded + 1, item.url);
           } else if (counter === 10) {
-            console.log('downloaded failed: ', item.url);
+            console.log('downloaded fail: ', item.url);
           }
         } catch (e) {
           console.log(e);
@@ -49,7 +60,7 @@ export const downloadInstanceFiles = async (
       } while (!res && counter < 10);
       downloaded += 1;
       if (
-        (updatePercentage && downloaded % 5 === 0) ||
+        (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
         downloaded === arr.length
       )
         updatePercentage(downloaded);

@@ -8,6 +8,7 @@ import coerce from 'semver/functions/coerce';
 import gte from 'semver/functions/gte';
 import lt from 'semver/functions/lt';
 import gt from 'semver/functions/gt';
+import eq from 'semver/functions/eq';
 import log from 'electron-log';
 import { pipeline } from 'stream';
 import zlib from 'zlib';
@@ -135,12 +136,68 @@ export function initManifests() {
     };
 
     const getMcExtraDependencies = async () => {
-      const extraDependency = (await getMcExtraDependency()).data;
+      const { mods, resourcepacks, shaderpacks } = (
+        await getMcExtraDependency()
+      ).data;
+
+      const prevExtraDependencies = app.extraDependencies;
+
+      Object.keys(mods).forEach(key => {
+        if (
+          mods[key] &&
+          prevExtraDependencies.mods &&
+          prevExtraDependencies.mods[key]
+        ) {
+          const needUpgrade = !eq(
+            coerce(mods[key].version),
+            coerce(prevExtraDependencies.mods[key].version)
+          );
+
+          mods[key].needUpgrade = needUpgrade;
+        }
+      });
+
+      Object.keys(resourcepacks).forEach(key => {
+        if (
+          resourcepacks[key] &&
+          prevExtraDependencies.resourcepacks &&
+          prevExtraDependencies.resourcepacks[key]
+        ) {
+          const needUpgrade = !eq(
+            coerce(resourcepacks[key].version),
+            coerce(prevExtraDependencies.resourcepacks[key].version)
+          );
+
+          resourcepacks[key].needUpgrade = needUpgrade;
+        }
+      });
+
+      Object.keys(shaderpacks).forEach(key => {
+        if (
+          shaderpacks[key] &&
+          prevExtraDependencies.shaderpacks &&
+          prevExtraDependencies.shaderpacks[key]
+        ) {
+          const needUpgrade = !eq(
+            coerce(shaderpacks[key].version),
+            coerce(prevExtraDependencies.shaderpacks[key].version)
+          );
+
+          shaderpacks[key].needUpgrade = needUpgrade;
+        }
+      });
+
+      const data = {
+        mods,
+        resourcepacks,
+        shaderpacks
+      };
+
       dispatch({
         type: ActionTypes.UPDATE_EXTRA_DEPENDENCIES,
-        data: extraDependency
+        data
       });
-      return extraDependency;
+      return data;
     };
 
     const getJava16ManifestVersions = async () => {
@@ -151,31 +208,21 @@ export function initManifests() {
       });
       return java;
     };
-    const getAddonCategoriesVersions = async () => {
-      const curseforgeCategories = (await getAddonCategories()).data;
-      dispatch({
-        type: ActionTypes.UPDATE_CURSEFORGE_CATEGORIES_MANIFEST,
-        data: curseforgeCategories
-      });
-      return curseforgeCategories;
-    };
     // Using reflect to avoid rejection
-    const [fabric, java16, categories, extraDependencies] = await Promise.all([
+    const [fabric, java16, extraDependencies] = await Promise.all([
       reflect(getFabricVersions()),
       reflect(getJava16ManifestVersions()),
-      reflect(getAddonCategoriesVersions()),
       reflect(getMcExtraDependencies())
     ]);
 
-    if (fabric.e || categories.e) {
-      console.error(fabric, categories);
+    if (fabric.e || extraDependencies.e) {
+      console.error(fabric, extraDependencies);
     }
 
     return {
       mc: mc || app.vanillaManifest,
       fabric: fabric.status ? fabric.v : app.fabricManifest,
       java16: java16.status ? java16.v : app.java16Manifest,
-      categories: categories.status ? categories.v : app.curseforgeCategories,
       extraDependencies
     };
   };
@@ -1146,7 +1193,10 @@ export function addNextInstanceToCurrentDownload() {
   };
 }
 
-export function downloadExtraDependencies(instanceName) {
+export function downloadExtraDependencies(
+  instanceName,
+  loadingText = 'Downloading extra dependencies...'
+) {
   return async (dispatch, getState) => {
     const state = getState();
     const {
@@ -1159,9 +1209,7 @@ export function downloadExtraDependencies(instanceName) {
       }
     } = state;
 
-    dispatch(
-      updateDownloadStatus(instanceName, 'Downloading extra dependencies...')
-    );
+    dispatch(updateDownloadStatus(instanceName, loadingText));
 
     const mods = Object.keys(modsJson).map(key => {
       return {
@@ -1184,7 +1232,7 @@ export function downloadExtraDependencies(instanceName) {
       };
     });
 
-    const shaderpacks = Object.keys(shaderpacksJson).map(async key => {
+    const shaderpacks = Object.keys(shaderpacksJson).map(key => {
       const fileName = path.join(
         _getInstancesPath(state),
         instanceName,
@@ -1203,7 +1251,7 @@ export function downloadExtraDependencies(instanceName) {
     console.log('resourcepacks: ', resourcepacks);
     console.log('shaderpacks: ', shaderpacks);
 
-    const dependencies = [...mods, ...resourcepacks, shaderpacks];
+    const dependencies = [...mods, ...resourcepacks, ...shaderpacks];
 
     let prev = 0;
     const updatePercentage = downloaded => {
@@ -1218,7 +1266,8 @@ export function downloadExtraDependencies(instanceName) {
     await downloadInstanceFiles(
       dependencies,
       updatePercentage,
-      state.settings.concurrentDownloads
+      state.settings.concurrentDownloads,
+      1
     );
   };
 }
@@ -1351,10 +1400,9 @@ export function downloadInstance(instanceName) {
       _getLibrariesPath(state)
     );
 
-    let prev = 0;
-
     console.log(assets.length + libraries.length + 1);
 
+    let prev = 0;
     const updatePercentage = downloaded => {
       const percentage =
         (downloaded * 100) / (assets.length + libraries.length + 1);
@@ -1373,12 +1421,25 @@ export function downloadInstance(instanceName) {
       state.settings.concurrentDownloads
     );
 
+    dispatch(updateDownloadStatus(instanceName, 'extracting game files...'));
+
     // Wait 400ms to avoid "The process cannot access the file because it is being used by another process."
     await new Promise(resolve => setTimeout(() => resolve(), 1000));
 
+    prev = 0;
     await extractNatives(
       libraries,
-      path.join(_getInstancesPath(state), instanceName)
+      path.join(_getInstancesPath(state), instanceName),
+      percent => {
+        // eslint-disable-next-line no-debugger
+        debugger;
+        const progress = parseInt(percent, 10);
+
+        if (progress !== prev) {
+          prev = progress;
+          dispatch(updateDownloadProgress(progress));
+        }
+      }
     );
 
     if (assetsJson.map_to_resources) {
