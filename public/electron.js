@@ -695,6 +695,8 @@ ipcMain.handle('calculateMurmur2FromPath', (e, filePath) => {
 // AutoUpdater
 
 if (process.env.REACT_APP_RELEASE_TYPE === 'setup') {
+  log.log('Enter AutoUpdater init logic ==========');
+
   autoUpdater.autoDownload = false;
   autoUpdater.allowDowngrade =
     !allowUnstableReleases && app.getVersion().includes('beta');

@@ -71,7 +71,7 @@ const SystemNavbar = () => {
   }, []);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') return;
+    // if (process.env.NODE_ENV === 'development') return;
     setTimeout(() => {
       checkForUpdates();
       setInterval(() => {
