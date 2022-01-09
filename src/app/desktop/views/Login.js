@@ -4,38 +4,76 @@ import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Transition } from 'react-transition-group';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons';
-import { Input, Button } from 'antd';
+import {
+  faExternalLinkAlt,
+  faInfoCircle
+} from '@fortawesome/free-solid-svg-icons';
+import { Button } from 'antd';
 import { useKey } from 'rooks';
 import { loginMetamask } from '../../../common/reducers/actions';
 import { load } from '../../../common/reducers/loading/actions';
 import features from '../../../common/reducers/loading/features';
-import backgroundVideo from '../../../common/assets/background.webm';
-import { openModal } from '../../../common/reducers/modals/actions';
+import backgroundImg from '../../../common/assets/background.png';
+import whitepaperIcon from '../../../common/assets/whitepaper.png';
+import twitterIcon from '../../../common/assets/twitter.png';
+import githubIcon from '../../../common/assets/github.png';
+import discordIcon from '../../../common/assets/discord.png';
 import metaCraftLogo from '../../../common/assets/metaCraft-logo.svg';
+import logoWithoutText from '../../../common/assets/logo.png';
 
-const LoginButton = styled(Button)`
-  border-radius: 4px;
-  font-size: 22px;
-  background: ${props =>
-    props.active ? props.theme.palette.grey[600] : 'transparent'};
-  border: 0;
-  height: auto;
-  margin-top: 20px;
-  text-align: center;
-  color: ${props => props.theme.palette.text.primary};
-  &:hover {
-    color: ${props => props.theme.palette.text.primary};
-    background: ${props => props.theme.palette.grey[600]};
-  }
-  &:focus {
-    color: ${props => props.theme.palette.text.primary};
-    background: ${props => props.theme.palette.grey[600]};
+const SocialMediaContainer = styled.div`
+  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-row-gap: 32px;
+  grid-column-gap: 120px;
+`;
+
+const SocialMediaIcon = styled.div`
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 20px;
+
+  > img {
+    margin-right: 8px;
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
   }
 `;
 
-const MetamaskLoginButton = styled(LoginButton)`
-  margin-top: 10px;
+const MetamaskLoginButton = styled(Button)`
+  position: relative;
+  margin-top: 60px;
+  width: 400px;
+  height: 56px;
+  background: ${props => props.theme.palette.blue[500]};
+  border-radius: 15px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: bold;
+
+  svg {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+  }
+`;
+
+const HelpLink = styled.div`
+  margin-top: 32px;
+  display  block;
+  text-align: center;
+  font-size: 16px;
+  line-height: 20px;
+  color: #f8f8f8;
+`;
+
+const Logo = styled.img`
+  width: 140px;
+  margin-bottom: 20px;
 `;
 
 const Container = styled.div`
@@ -47,8 +85,8 @@ const Container = styled.div`
 
 const LeftSide = styled.div`
   position: relative;
-  width: 300px;
-  padding: 40px;
+  flex: 0 0 600px;
+  padding: 20px 40px;
   height: 100%;
   transition: 0.3s ease-in-out;
   transform: translateX(
@@ -58,9 +96,7 @@ const LeftSide = styled.div`
         : 0}px
   );
   background: ${props => props.theme.palette.secondary.main};
-  & div {
-    margin: 10px 0;
-  }
+
   p {
     margin-top: 1em;
     color: ${props => props.theme.palette.text.third};
@@ -76,11 +112,13 @@ const Form = styled.div`
 `;
 
 const Background = styled.div`
+  position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  video {
+
+  > img {
     transition: 0.3s ease-in-out;
     transform: translateX(
       ${({ transitionState }) =>
@@ -89,13 +127,24 @@ const Background = styled.div`
           : 0}px
     );
     position: absolute;
-    z-index: -1;
-    height: 150%;
-    top: -30%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    object-fit: cover;
   }
 `;
 
-const Header = styled.div``;
+const Header = styled.div`
+  margin-top: 80px !important;
+  display: flex;
+  flex-direction: columns;
+  justify-content: center;
+  alig-items: center;
+  img {
+    width: 160px;
+  }
+`;
 
 const Footer = styled.div`
   position: absolute;
@@ -105,17 +154,6 @@ const Footer = styled.div`
   justify-content: space-between;
   align-items: center;
   width: calc(100% - 80px);
-`;
-
-const FooterLinks = styled.div`
-  font-size: 0.75rem;
-  margin: 0 !important;
-  a {
-    color: ${props => props.theme.palette.text.third};
-  }
-  a:hover {
-    color: ${props => props.theme.palette.text.secondary};
-  }
 `;
 
 const Loading = styled.div`
@@ -187,126 +225,85 @@ const Login = () => {
       {transitionState => (
         <Container>
           <LeftSide transitionState={transitionState}>
+            <a
+              href="https://metacraft.cc/"
+              rel="noopener noreferrer"
+              css={`
+                -webkit-app-region: no-drag;
+                cursor: pointer;
+              `}
+            >
+              <Logo
+                src={metaCraftLogo}
+                alt="Metacraft"
+                css="cursor: pointer;"
+              />
+            </a>
             <Header>
               <a
                 href="https://metacraft.cc/"
                 rel="noopener noreferrer"
                 css={`
-                  margin-right: 10px;
                   -webkit-app-region: no-drag;
                   cursor: pointer;
                 `}
               >
                 <img
-                  src={metaCraftLogo}
+                  src={logoWithoutText}
                   alt="Metacraft"
                   css="cursor: pointer;"
                 />
               </a>
             </Header>
             <Form>
-              <div>
-                <Input
-                  placeholder="username"
-                  value={username}
-                  onChange={({ target: { value } }) => {
-                    setUsername(value);
-                  }}
-                />
-              </div>
-              {loginFailed && (
-                <LoginFailMessage>{loginFailed?.message}</LoginFailMessage>
-              )}
               <MetamaskLoginButton
                 color="primary"
                 onClick={openChromeWithMetamask}
               >
                 Sign in with Metamask
+                <FontAwesomeIcon icon={faExternalLinkAlt} />
+              </MetamaskLoginButton>
+              <HelpLink>
+                How to install and use Metamask?
                 <FontAwesomeIcon
                   css={`
                     margin-left: 6px;
                   `}
-                  icon={faExternalLinkAlt}
+                  icon={faInfoCircle}
                 />
-              </MetamaskLoginButton>
+              </HelpLink>
             </Form>
             <Footer>
-              <div
-                css={`
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: flex-end;
-                  width: 100%;
-                `}
-              >
-                <FooterLinks>
-                  <div>
-                    <a href="https://www.minecraft.net/it-it/password/forgot">
-                      FORGOT PASSWORD
-                    </a>
-                  </div>
-                </FooterLinks>
-                <div
-                  css={`
-                    cursor: pointer;
-                  `}
-                  onClick={() => dispatch(openModal('ChangeLogs'))}
-                >
-                  v{version}
-                </div>
-              </div>
-              <p
-                css={`
-                  font-size: 10px;
-                `}
-              >
-                Sign in with your Mojang Account. By doing so, you accept all
-                our policies and terms stated below.
-              </p>
-              <div
-                css={`
-                  margin-top: 20px;
-                  font-size: 10px;
-                  display: flex;
-                  width: 100%;
-                  text-align: center;
-                  flex-direction: row;
-                  span {
-                    text-decoration: underline;
-                    cursor: pointer;
-                  }
-                `}
-              >
-                <span
-                  onClick={() =>
-                    dispatch(openModal('PolicyModal', { policy: 'privacy' }))
-                  }
-                >
-                  Privacy Policy
-                </span>
-                <span
-                  onClick={() =>
-                    dispatch(openModal('PolicyModal', { policy: 'tos' }))
-                  }
-                >
-                  Terms and Conditions
-                </span>
-                <span
-                  onClick={() =>
-                    dispatch(
-                      openModal('PolicyModal', { policy: 'acceptableuse' })
-                    )
-                  }
-                >
-                  Acceptable Use Policy
-                </span>
-              </div>
+              <SocialMediaContainer>
+                <a href="">
+                  <SocialMediaIcon>
+                    <img src={whitepaperIcon} alt="whitepaper" />
+                    <p>WhitePaper</p>
+                  </SocialMediaIcon>
+                </a>
+                <a href="">
+                  <SocialMediaIcon>
+                    <img src={twitterIcon} alt="twitter" />
+                    <p>Twitter</p>
+                  </SocialMediaIcon>
+                </a>
+                <a href="">
+                  <SocialMediaIcon>
+                    <img src={discordIcon} alt="discord" />
+                    <p>Discord</p>
+                  </SocialMediaIcon>
+                </a>
+                <a href="">
+                  <SocialMediaIcon>
+                    <img src={githubIcon} alt="github" />
+                    <p>Github</p>
+                  </SocialMediaIcon>
+                </a>
+              </SocialMediaContainer>
             </Footer>
           </LeftSide>
           <Background transitionState={transitionState}>
-            <video autoPlay muted loop>
-              <source src={backgroundVideo} type="video/webm" />
-            </video>
+            <img src={backgroundImg} alt="background" />
           </Background>
           <Loading transitionState={transitionState}>Loading...</Loading>
         </Container>
