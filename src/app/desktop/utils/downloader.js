@@ -88,8 +88,8 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
     const { data } = await axios.get(url, {
       responseType: 'stream',
       responseEncoding: null,
-      httpAgent: new http.Agent({ keepAlive: true, timeout: 10000 }),
-      httpsAgent: new https.Agent({ keepAlive: true, timeout: 10000 }),
+      httpAgent: new http.Agent({ keepAlive: true, timeout: 5000 }),
+      httpsAgent: new https.Agent({ keepAlive: true, timeout: 5000 }),
       timeout: 60000,
       adapter
     });
@@ -135,6 +135,9 @@ export const downloadFile = async (fileName, url, onProgress) => {
   const { data, headers } = await axios.get(url, {
     responseType: 'stream',
     responseEncoding: null,
+    httpAgent: new http.Agent({ keepAlive: true, timeout: 5000 }),
+    httpsAgent: new https.Agent({ keepAlive: true, timeout: 5000 }),
+    timeout: 60000,
     adapter
   });
   const out = fss.createWriteStream(fileName, { encoding: null });
