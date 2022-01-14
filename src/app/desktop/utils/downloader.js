@@ -77,9 +77,6 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
       if (legacyPath) await fs.access(legacyPath);
       const checksum = await computeFileHash(fileName);
       const legacyChecksum = legacyPath && (await computeFileHash(legacyPath));
-      if (!sha1) {
-        return true;
-      }
       if (checksum === sha1 && (!legacyPath || legacyChecksum === sha1)) {
         return true;
       }
