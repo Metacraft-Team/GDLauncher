@@ -36,23 +36,27 @@ export const downloadInstanceFiles = async (
       }
       do {
         counter += 1;
+        let url = item.url
         if (counter !== 1) {
           await new Promise(resolve => setTimeout(resolve, 1000));
+          if (count % 2 === 0 && url.startsWith == "https://resources.download.minecraft.net") {
+            url = url.replaceAll("https://resources.download.minecraft.net", "https://p-rdmc.metacraft.cc")
+          }
         }
         try {
-          console.log('downloading: ', item.url, 'counter: ', counter);
+          console.log('downloading: ', url, 'counter: ', counter);
 
           res = await downloadFileInstance(
             item.path,
-            item.url,
+            url,
             item.sha1,
             item.legacyPath
           );
 
           if (res) {
-            console.log('downloaded success: ', downloaded + 1, item.url);
+            console.log('downloaded success: ', downloaded + 1, url);
           } else if (counter === 20) {
-            console.log('downloaded fail: ', item.url);
+            console.log('downloaded fail: ', url);
           }
         } catch (e) {
           console.log(e);
