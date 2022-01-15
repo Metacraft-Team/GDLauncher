@@ -55,13 +55,13 @@ export const downloadInstanceFiles = async (
 
           if (res) {
             console.log('downloaded success: ', downloaded + 1, url);
-          } else if (counter === 20) {
+          } else if (counter === 100) {
             console.log('downloaded fail: ', url);
           }
         } catch (e) {
           console.log(e);
         }
-      } while (!res && counter < 20);
+      } while (!res && counter < 100);
       downloaded += 1;
       if (
         (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
