@@ -40,7 +40,7 @@ export const downloadInstanceFiles = async (
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
         try {
-          console.log('downloading: ', item.url);
+          console.log('downloading: ', item.url, 'counter: ', counter);
 
           res = await downloadFileInstance(
             item.path,
@@ -88,9 +88,9 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
     const { data } = await axios.get(url, {
       responseType: 'stream',
       responseEncoding: null,
-      httpAgent: new http.Agent({ keepAlive: true, timeout: 5000 }),
-      httpsAgent: new https.Agent({ keepAlive: true, timeout: 5000 }),
-      timeout: 60000,
+      httpAgent: new http.Agent({ keepAlive: true }),
+      httpsAgent: new https.Agent({ keepAlive: true }),
+      timeout: 5000,
       adapter
     });
     const wStream = fss.createWriteStream(fileName, {
