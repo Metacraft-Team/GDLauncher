@@ -39,7 +39,7 @@ export const downloadInstanceFiles = async (
         let url = item.url
         if (counter !== 1) {
           await new Promise(resolve => setTimeout(resolve, 1000));
-          if (count % 2 === 0 && url.startsWith == "https://resources.download.minecraft.net") {
+          if (count % 2 === 0 && url.startsWith("https://resources.download.minecraft.net")) {
             url = url.replaceAll("https://resources.download.minecraft.net", "https://p-rdmc.metacraft.cc")
           }
         }
