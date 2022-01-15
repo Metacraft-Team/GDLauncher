@@ -37,7 +37,7 @@ export const downloadInstanceFiles = async (
       do {
         counter += 1;
         if (counter !== 1) {
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
         try {
           console.log('downloading: ', item.url, 'counter: ', counter);
@@ -51,13 +51,13 @@ export const downloadInstanceFiles = async (
 
           if (res) {
             console.log('downloaded success: ', downloaded + 1, item.url);
-          } else if (counter === 10) {
+          } else if (counter === 20) {
             console.log('downloaded fail: ', item.url);
           }
         } catch (e) {
           console.log(e);
         }
-      } while (!res && counter < 10);
+      } while (!res && counter < 20);
       downloaded += 1;
       if (
         (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
