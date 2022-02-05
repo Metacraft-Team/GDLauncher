@@ -45,7 +45,7 @@ module.exports = {
       jungleGreen: '#43aa8b',
       maximumRed: '#d62828',
       darkYellow: '#f18805',
-      orange: '#f26430'
+      orange: '#ea4e34'
     },
     text: {
       disabled: 'rgba(255, 255, 255, 0.38)',

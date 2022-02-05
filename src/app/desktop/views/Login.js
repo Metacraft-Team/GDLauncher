@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import {
   faExternalLinkAlt,
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
-import { Button } from 'antd';
+import { Button, Space } from 'antd';
 import { useKey } from 'rooks';
 import { loginMetamask } from '../../../common/reducers/actions';
 import { load } from '../../../common/reducers/loading/actions';
@@ -20,6 +20,8 @@ import githubIcon from '../../../common/assets/github.png';
 import discordIcon from '../../../common/assets/discord.png';
 import metaCraftLogo from '../../../common/assets/metaCraft-logo.svg';
 import logoWithoutText from '../../../common/assets/logo.png';
+import leftSideBg from '../../../common/assets/left-side-bg.svg';
+import formatAddress from '../../../common/utils/formatAddress';
 
 const SocialMediaContainer = styled.div`
   margin-bottom: 40px;
@@ -35,6 +37,7 @@ const SocialMediaIcon = styled.div`
   align-items: center;
   color: #fff;
   font-size: 20px;
+  cursor: pointer;
 
   > img {
     margin-right: 8px;
@@ -44,22 +47,74 @@ const SocialMediaIcon = styled.div`
   }
 `;
 
-const MetamaskLoginButton = styled(Button)`
-  position: relative;
-  margin-top: 60px;
+/** login & cancel button */
+const BaseButton = styled(Button)`
   width: 400px;
   height: 56px;
-  background: ${props => props.theme.palette.blue[500]};
+  color: #fff !important;
   border-radius: 15px;
   font-size: 18px;
   line-height: 24px;
   font-weight: bold;
+  border: none !important;
+`;
+
+const ButtonGroup = styled(Space)`
+  width: 100%;
+`;
+
+const MetamaskLoginButton = styled(BaseButton)`
+  position: relative;
+  margin-top: 60px;
+  width: 400px;
+  height: 56px;
+  background: ${props => props.theme.palette.blue[500]} !important;
 
   svg {
     position: absolute;
+    width: 16px;
+    height: 16px;
     top: 18px;
     right: 24px;
   }
+`;
+
+const LoginButton = styled(BaseButton)`
+  background: ${props => props.theme.palette.blue[500]} !important;
+`;
+
+const CancelButton = styled(BaseButton)`
+  background: ${props => props.theme.palette.colors.orange} !important;
+`;
+
+/** account informations  */
+const AccountInfoContainer = styled(Space)`
+  width: 100%;
+  margin: 40px 0 32px 0;
+`;
+
+const AccountInfoLabel = styled.div`
+  margin-bottom: 8px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.175px;
+  color: #f8f8f8;
+  opacity: 0.65;
+`;
+
+const AccountInfoContent = styled.div`
+  width: 400px;
+  height: 48px;
+  padding: 0 20px;
+  background: #293649;
+  border-radius: 15px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 48px;
+  letter-spacing: 0.2px;
+  color: #f8f8f8;
 `;
 
 const HelpLink = styled.div`
@@ -69,6 +124,7 @@ const HelpLink = styled.div`
   font-size: 16px;
   line-height: 20px;
   color: #f8f8f8;
+  cursor: pointer;
 `;
 
 const Logo = styled.img`
@@ -88,6 +144,7 @@ const LeftSide = styled.div`
   flex: 0 0 600px;
   padding: 20px 40px;
   height: 100%;
+  overflow-y: auto;
   transition: 0.3s ease-in-out;
   transform: translateX(
     ${({ transitionState }) =>
@@ -95,20 +152,12 @@ const LeftSide = styled.div`
         ? -300
         : 0}px
   );
-  background: ${props => props.theme.palette.secondary.main};
+  background: url('${leftSideBg}') 0 0 100% 100% no-repeat;
 
   p {
     margin-top: 1em;
     color: ${props => props.theme.palette.text.third};
   }
-`;
-
-const Form = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  margin: 20px 0 !important;
 `;
 
 const Background = styled.div`
@@ -146,14 +195,20 @@ const Header = styled.div`
   }
 `;
 
+const Content = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 120px;
+`;
+
 const Footer = styled.div`
-  position: absolute;
-  bottom: 4px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  width: calc(100% - 80px);
 `;
 
 const Loading = styled.div`
@@ -170,55 +225,68 @@ const Loading = styled.div`
   opacity: ${({ transitionState }) =>
     transitionState === 'entering' || transitionState === 'entered' ? 1 : 0};
 `;
-const LoginFailMessage = styled.div`
-  color: ${props => props.theme.palette.colors.red};
-`;
 
 const Login = () => {
   const dispatch = useDispatch();
+  // switch for showing confirm account view
+  const [isConfirmAccount, setConfirmAccount] = useState(true);
+
+  // account informations which received from matemask
   const [username, setUsername] = useState(null);
-  const [version, setVersion] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [params, setParams] = useState(null);
+
   const [loginFailed, setLoginFailed] = useState(false);
+
   const loading = useSelector(
     state => state.loading.accountAuthentication.isRequesting
   );
 
   const openChromeWithMetamask = () => {
-    ipcRenderer.invoke('loginWithMetamask', { username });
+    ipcRenderer.invoke('loginWithMetamask');
   };
 
   useKey(['Enter'], openChromeWithMetamask);
 
-  useEffect(() => {
-    ipcRenderer.invoke('getAppVersion').then(setVersion).catch(console.error);
-  }, []);
+  const handleLogin = useCallback(() => {
+    dispatch(
+      load(
+        features.mcAuthentication,
+        dispatch(
+          loginMetamask({
+            ...params,
+            timestamp: Number(params.timestamp),
+            username
+          })
+        )
+      )
+    ).catch(error => {
+      console.error(error);
+      setLoginFailed(error);
+    });
+  }, [dispatch, username, address, params]);
+
+  const handleCancel = useCallback(() => {
+    setConfirmAccount(false);
+    // clear old account informations
+    setParams(null);
+    setUsername(null);
+    setAddress(null);
+  }, [setConfirmAccount, setParams, setUsername, setAddress]);
 
   useEffect(() => {
-    ipcRenderer.on('receive-metamask-login-params', (e, params) => {
+    ipcRenderer.on('receive-metamask-login-params', (e, received) => {
       console.log(params, username);
       console.log('authenticate ....');
-
-      dispatch(
-        load(
-          features.mcAuthentication,
-          dispatch(
-            loginMetamask({
-              ...params,
-              timestamp: Number(params.timestamp),
-              username
-            })
-          )
-        )
-      ).catch(error => {
-        console.error(error);
-        setLoginFailed(error);
-      });
+      setParams(received);
+      setAddress(received.address);
+      setUsername(received.username);
     });
 
     return () => {
       ipcRenderer.removeAllListeners('receive-metamask-login-params');
     };
-  }, [username]);
+  }, [username, setParams, setAddress, setUsername]);
 
   return (
     <Transition in={loading} timeout={300}>
@@ -255,45 +323,98 @@ const Login = () => {
                 />
               </a>
             </Header>
-            <Form>
-              <MetamaskLoginButton
-                color="primary"
-                onClick={openChromeWithMetamask}
-              >
-                Sign in with Metamask
-                <FontAwesomeIcon icon={faExternalLinkAlt} />
-              </MetamaskLoginButton>
-              <HelpLink>
-                How to install and use Metamask?
-                <FontAwesomeIcon
-                  css={`
-                    margin-left: 6px;
-                  `}
-                  icon={faInfoCircle}
-                />
-              </HelpLink>
-            </Form>
+            <Content>
+              {isConfirmAccount ? (
+                <AccountInfoContainer
+                  direction="vertical"
+                  align="center"
+                  size={14}
+                >
+                  <div>
+                    <AccountInfoLabel>Address</AccountInfoLabel>
+                    <AccountInfoContent>
+                      {formatAddress(address)}
+                    </AccountInfoContent>
+                  </div>
+                  <div>
+                    <AccountInfoLabel>Nickname</AccountInfoLabel>
+                    <AccountInfoContent>{username}</AccountInfoContent>
+                  </div>
+                </AccountInfoContainer>
+              ) : null}
+              <ButtonGroup direction="vertical" align="center" size={24}>
+                {isConfirmAccount ? (
+                  <>
+                    <LoginButton onClick={handleLogin}>Login</LoginButton>
+                    <CancelButton onClick={handleCancel}>Cancel</CancelButton>
+                  </>
+                ) : (
+                  <MetamaskLoginButton
+                    color="primary"
+                    onClick={openChromeWithMetamask}
+                  >
+                    Sign in with Metamask
+                    <FontAwesomeIcon icon={faExternalLinkAlt} />
+                  </MetamaskLoginButton>
+                )}
+              </ButtonGroup>
+              {isConfirmAccount ? null : (
+                <HelpLink>
+                  How to install and use Metamask?
+                  <FontAwesomeIcon
+                    css={`
+                      margin-left: 6px;
+                    `}
+                    icon={faInfoCircle}
+                  />
+                </HelpLink>
+              )}
+            </Content>
             <Footer>
               <SocialMediaContainer>
-                <a href="">
+                <a
+                  href=""
+                  css={`
+                    -webkit-app-region: no-drag;
+                    cursor: pointer;
+                  `}
+                >
                   <SocialMediaIcon>
                     <img src={whitepaperIcon} alt="whitepaper" />
                     <p>WhitePaper</p>
                   </SocialMediaIcon>
                 </a>
-                <a href="">
+                <a
+                  href=""
+                  css={`
+                    -webkit-app-region: no-drag;
+                    cursor: pointer;
+                  `}
+                >
                   <SocialMediaIcon>
                     <img src={twitterIcon} alt="twitter" />
                     <p>Twitter</p>
                   </SocialMediaIcon>
                 </a>
-                <a href="">
+                <a
+                  href=""
+                  css={`
+                    -webkit-app-region: no-drag;
+                    cursor: pointer;
+                  `}
+                >
                   <SocialMediaIcon>
                     <img src={discordIcon} alt="discord" />
                     <p>Discord</p>
                   </SocialMediaIcon>
                 </a>
-                <a href="">
+                <a
+                  href=""
+                  css={`
+                    -webkit-app-region: no-drag;
+                    cursor: pointer;
+                  `}
+                >
                   <SocialMediaIcon>
                     <img src={githubIcon} alt="github" />
                     <p>Github</p>

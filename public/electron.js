@@ -437,11 +437,11 @@ app.on('web-contents-created', (e, webContents) => {
   });
 });
 
-ipcMain.handle('loginWithMetamask', (e, { username }) => {
-  // const url = isDev
-  //   ? `http://localhost:3001/?username=${username}`
-  //   : `https://metacraft-frontend.vercel.app/?username=${username}`;
-  const url = `https://metacraft-frontend.vercel.app/?username=${username}`;
+ipcMain.handle('loginWithMetamask', () => {
+  const url = isDev
+    ? 'http://localhost:3001'
+    : 'https://metacraft-frontend.vercel.app';
+
   shell.openExternal(url);
 });
 

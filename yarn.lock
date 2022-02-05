@@ -10713,6 +10713,11 @@ optionator@^0.9.1:
     type-check "^0.4.0"
     word-wrap "^1.2.3"
 
+original-fs@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/original-fs/-/original-fs-1.1.0.tgz#f856f031b9e24c082ed35b497c9fd4b29f2c031f"
+  integrity sha512-LhW6DNoXdp8oo+Wv6N/QcxNrX/lE8McIySZ1O7llfJut4qA1Sfoy8BjHHWD6lHQMEdoFL+fosGK/DJSkQ5CP2g==
+
 original@^1.0.0:
   version "1.0.2"
   resolved "https://registry.npmjs.org/original/-/original-1.0.2.tgz"
