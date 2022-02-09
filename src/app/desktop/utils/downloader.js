@@ -36,28 +36,32 @@ export const downloadInstanceFiles = async (
       }
       do {
         counter += 1;
+        let url = item.url
         if (counter !== 1) {
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          if (counter % 2 === 0 && url.startsWith("https://resources.download.minecraft.net")) {
+            url = url.replaceAll("https://resources.download.minecraft.net", "https://p-rdmc.metacraft.cc")
+          }
         }
         try {
-          console.log('downloading: ', item.url);
+          console.log('downloading: ', url, 'counter: ', counter);
 
           res = await downloadFileInstance(
             item.path,
-            item.url,
+            url,
             item.sha1,
             item.legacyPath
           );
 
           if (res) {
-            console.log('downloaded success: ', downloaded + 1, item.url);
-          } else if (counter === 10) {
-            console.log('downloaded fail: ', item.url);
+            console.log('downloaded success: ', downloaded + 1, url);
+          } else if (counter === 100) {
+            console.log('downloaded fail: ', url);
           }
         } catch (e) {
           console.log(e);
         }
-      } while (!res && counter < 10);
+      } while (!res && counter < 100);
       downloaded += 1;
       if (
         (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
@@ -77,9 +81,6 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
       if (legacyPath) await fs.access(legacyPath);
       const checksum = await computeFileHash(fileName);
       const legacyChecksum = legacyPath && (await computeFileHash(legacyPath));
-      if (!sha1) {
-        return true;
-      }
       if (checksum === sha1 && (!legacyPath || legacyChecksum === sha1)) {
         return true;
       }
@@ -91,9 +92,9 @@ const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
     const { data } = await axios.get(url, {
       responseType: 'stream',
       responseEncoding: null,
-      httpAgent: new http.Agent({ keepAlive: true, timeout: 10000 }),
-      httpsAgent: new https.Agent({ keepAlive: true, timeout: 10000 }),
-      timeout: 60000,
+      httpAgent: new http.Agent({ keepAlive: true }),
+      httpsAgent: new https.Agent({ keepAlive: true }),
+      timeout: 5000,
       adapter
     });
     const wStream = fss.createWriteStream(fileName, {
@@ -138,6 +139,9 @@ export const downloadFile = async (fileName, url, onProgress) => {
   const { data, headers } = await axios.get(url, {
     responseType: 'stream',
     responseEncoding: null,
+    httpAgent: new http.Agent({ keepAlive: true, timeout: 5000 }),
+    httpsAgent: new https.Agent({ keepAlive: true, timeout: 5000 }),
+    timeout: 60000,
     adapter
   });
   const out = fss.createWriteStream(fileName, { encoding: null });
