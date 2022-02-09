@@ -447,7 +447,8 @@ ipcMain.handle('loginWithMetamask', () => {
   // const url = isDev
   //   ? `http://localhost:3001?name=${username}`
   //   : `https://metacraft-frontend.vercel.app?name=${username}`;
-  const url = `https://metacraft-frontend.vercel.app`;
+  // const url = `https://metacraft-frontend.vercel.app`;
+  const url = 'https://metacraft-dapp-xi.vercel.app';
 
   shell.openExternal(url);
 });
