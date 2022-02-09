@@ -65,7 +65,7 @@ const ButtonGroup = styled(Space)`
 
 const MetamaskLoginButton = styled(BaseButton)`
   position: relative;
-  margin-top: 60px;
+  margin-top: 75px;
   width: 400px;
   height: 56px;
   background: ${props => props.theme.palette.blue[500]} !important;
@@ -229,22 +229,22 @@ const Loading = styled.div`
 const Login = () => {
   const dispatch = useDispatch();
   // switch for showing confirm account view
-  const [isConfirmAccount, setConfirmAccount] = useState(true);
+  const [isConfirmAccount, setConfirmAccount] = useState(false);
 
   // account informations which received from matemask
-  const [username, setUsername] = useState(null);
-  const [address, setAddress] = useState(null);
   const [params, setParams] = useState(null);
 
-  const [loginFailed, setLoginFailed] = useState(false);
+  const [setLoginFailed] = useState(false);
 
   const loading = useSelector(
     state => state.loading.accountAuthentication.isRequesting
   );
 
-  const openChromeWithMetamask = () => {
+  const openChromeWithMetamask = useCallback(() => {
     ipcRenderer.invoke('loginWithMetamask');
-  };
+
+    return true;
+  }, []);
 
   useKey(['Enter'], openChromeWithMetamask);
 
@@ -254,9 +254,10 @@ const Login = () => {
         features.mcAuthentication,
         dispatch(
           loginMetamask({
-            ...params,
+            address: params.checksumAddress,
+            username: params.name,
             timestamp: Number(params.timestamp),
-            username
+            signature: params.signature
           })
         )
       )
@@ -264,29 +265,27 @@ const Login = () => {
       console.error(error);
       setLoginFailed(error);
     });
-  }, [dispatch, username, address, params]);
+  }, [dispatch, params]);
 
   const handleCancel = useCallback(() => {
     setConfirmAccount(false);
     // clear old account informations
     setParams(null);
-    setUsername(null);
-    setAddress(null);
-  }, [setConfirmAccount, setParams, setUsername, setAddress]);
+  }, [setConfirmAccount, setParams]);
 
   useEffect(() => {
     ipcRenderer.on('receive-metamask-login-params', (e, received) => {
-      console.log(params, username);
       console.log('authenticate ....');
+
       setParams(received);
-      setAddress(received.address);
-      setUsername(received.username);
+
+      setConfirmAccount(true);
     });
 
     return () => {
       ipcRenderer.removeAllListeners('receive-metamask-login-params');
     };
-  }, [username, setParams, setAddress, setUsername]);
+  }, [setParams]);
 
   return (
     <Transition in={loading} timeout={300}>
@@ -324,24 +323,26 @@ const Login = () => {
               </a>
             </Header>
             <Content>
-              {isConfirmAccount ? (
-                <AccountInfoContainer
-                  direction="vertical"
-                  align="center"
-                  size={14}
-                >
-                  <div>
-                    <AccountInfoLabel>Address</AccountInfoLabel>
-                    <AccountInfoContent>
-                      {formatAddress(address)}
-                    </AccountInfoContent>
-                  </div>
-                  <div>
-                    <AccountInfoLabel>Nickname</AccountInfoLabel>
-                    <AccountInfoContent>{username}</AccountInfoContent>
-                  </div>
-                </AccountInfoContainer>
-              ) : null}
+              <AccountInfoContainer
+                direction="vertical"
+                align="center"
+                size={14}
+              >
+                {isConfirmAccount ? (
+                  <>
+                    <div>
+                      <AccountInfoLabel>Address</AccountInfoLabel>
+                      <AccountInfoContent>
+                        {formatAddress(params.address)}
+                      </AccountInfoContent>
+                    </div>
+                    <div>
+                      <AccountInfoLabel>Nickname</AccountInfoLabel>
+                      <AccountInfoContent>{params.name}</AccountInfoContent>
+                    </div>
+                  </>
+                ) : null}
+              </AccountInfoContainer>
               <ButtonGroup direction="vertical" align="center" size={24}>
                 {isConfirmAccount ? (
                   <>
@@ -373,7 +374,7 @@ const Login = () => {
             <Footer>
               <SocialMediaContainer>
                 <a
-                  href=""
+                  href="https://docs.metacraft.cc/white-paper/introduction/what-is-metacraft"
                   css={`
                     -webkit-app-region: no-drag;
                     cursor: pointer;
@@ -385,7 +386,7 @@ const Login = () => {
                   </SocialMediaIcon>
                 </a>
                 <a
-                  href=""
+                  href="https://twitter.com/MetaCraftCC"
                   css={`
                     -webkit-app-region: no-drag;
                     cursor: pointer;
@@ -397,7 +398,7 @@ const Login = () => {
                   </SocialMediaIcon>
                 </a>
                 <a
-                  href=""
+                  href="https://discord.com/invite/PvzFHa4QJd"
                   css={`
                     -webkit-app-region: no-drag;
                     cursor: pointer;
@@ -409,7 +410,7 @@ const Login = () => {
                   </SocialMediaIcon>
                 </a>
                 <a
-                  href=""
+                  href="https://github.com/Metacraft-Team"
                   css={`
                     -webkit-app-region: no-drag;
                     cursor: pointer;
