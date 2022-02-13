@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { Spin, message } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { push } from 'connected-react-router';
 import Modal from '../components/Modal';
+
 import { _getAccounts, _getCurrentAccount } from '../utils/selectors';
 import { openModal, closeModal } from '../reducers/modals/actions';
 import {
@@ -23,6 +25,11 @@ const ProfileSettings = () => {
   const accounts = useSelector(_getAccounts);
   const currentAccount = useSelector(_getCurrentAccount);
   const isLoading = useSelector(state => state.loading.accountAuthentication);
+  const handleAddAccount = useCallback(() => {
+    dispatch(closeModal());
+    dispatch(push('/'));
+  }, []);
+
   return (
     <Modal
       css={`
@@ -133,9 +140,7 @@ const ProfileSettings = () => {
           })}
         </AccountsContainer>
         <AccountContainer>
-          <AccountItem onClick={() => dispatch(openModal('AddAccount'))}>
-            Add Account
-          </AccountItem>
+          <AccountItem onClick={handleAddAccount}>Add Account</AccountItem>
         </AccountContainer>
       </Container>
     </Modal>

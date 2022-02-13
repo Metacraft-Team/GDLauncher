@@ -51,19 +51,25 @@ const sendLoginParams = urlStr => {
   const { searchParams } = urlObj;
   const signature = searchParams.get('signature');
   const address = searchParams.get('address');
+  const checksumAddress = searchParams.get('checksumAddress');
   const timestamp = searchParams.get('timestamp');
-
-  log.log(signature, address, timestamp);
+  const name = searchParams.get('name');
 
   if (mainWindow) {
-    if (process.platform === 'win32' && mainWindow.isMinimized())
+    if (process.platform === 'win32' && mainWindow.isMinimized()) {
       mainWindow.restore();
+    }
+
     mainWindow.focus();
     mainWindow.show();
+
     log.log('mainWindow webContents send');
+
     mainWindow.webContents.send('receive-metamask-login-params', {
-      signature,
+      name,
       address,
+      checksumAddress,
+      signature,
       timestamp
     });
   }
@@ -76,7 +82,7 @@ if (gotTheLock) {
     sendLoginParams(urlStr);
   });
 
-  app.on('second-instance', (e, commandLine, workingDirectory) => {
+  app.on('second-instance', (e, commandLine) => {
     if (process.platform === 'win32') {
       // for Windows
       sendLoginParams(commandLine[commandLine.length - 1]);
@@ -437,11 +443,13 @@ app.on('web-contents-created', (e, webContents) => {
   });
 });
 
-ipcMain.handle('loginWithMetamask', (e, { username }) => {
+ipcMain.handle('loginWithMetamask', () => {
   // const url = isDev
-  //   ? `http://localhost:3001/?username=${username}`
-  //   : `https://metacraft-frontend.vercel.app/?username=${username}`;
-  const url = `https://metacraft-frontend.vercel.app/?username=${username}`;
+  //   ? `http://localhost:3001?name=${username}`
+  //   : `https://metacraft-frontend.vercel.app?name=${username}`;
+  // const url = `https://metacraft-frontend.vercel.app`;
+  const url = 'https://metacraft-dapp-xi.vercel.app';
+
   shell.openExternal(url);
 });
 

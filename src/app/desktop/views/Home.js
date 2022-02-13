@@ -1,7 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { Button } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { ipcRenderer } from 'electron';
@@ -22,12 +20,6 @@ import {
   FABRIC_LOADER_VERSION
 } from '../../../common/utils/constants';
 
-const AddInstanceIcon = styled(Button)`
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-`;
-
 const AccountContainer = styled(Button)`
   position: fixed;
   bottom: 20px;
@@ -47,10 +39,6 @@ const Home = () => {
       mcVersion: MC_VERSION
     }
   });
-
-  const openAddInstanceModal = defaultPage => {
-    dispatch(openModal('AddInstance', { defaultPage }));
-  };
 
   const openAccountModal = () => {
     dispatch(openModal('AccountsManager'));

@@ -31,6 +31,9 @@ module.exports = {
       800: '#121929',
       900: '#050818'
     },
+    blue: {
+      500: '#2539f4'
+    },
     colors: {
       red: '#D64441',
       yellow: '#FAB849',
@@ -42,7 +45,7 @@ module.exports = {
       jungleGreen: '#43aa8b',
       maximumRed: '#d62828',
       darkYellow: '#f18805',
-      orange: '#f26430'
+      orange: '#ea4e34'
     },
     text: {
       disabled: 'rgba(255, 255, 255, 0.38)',

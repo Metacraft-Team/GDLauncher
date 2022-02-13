@@ -41,7 +41,6 @@ import {
 } from '../utils/constants';
 import {
   getAddon,
-  getAddonCategories,
   getAddonFile,
   getAddonFiles,
   getAddonsByFingerprint,
@@ -883,8 +882,6 @@ export function logoutMetamask(params) {
   return (dispatch, getState) => {
     const state = getState();
     const {
-      address,
-      accessToken,
       selectedProfile: { id }
     } = _getCurrentAccount(state);
 
