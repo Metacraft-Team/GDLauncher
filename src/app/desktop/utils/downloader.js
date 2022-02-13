@@ -36,11 +36,17 @@ export const downloadInstanceFiles = async (
       }
       do {
         counter += 1;
-        let url = item.url
+        let { url } = item;
         if (counter !== 1) {
           await new Promise(resolve => setTimeout(resolve, 1000));
-          if (counter % 2 === 0 && url.startsWith("https://resources.download.minecraft.net")) {
-            url = url.replaceAll("https://resources.download.minecraft.net", "https://p-rdmc.metacraft.cc")
+          if (
+            counter % 2 === 0 &&
+            url.startsWith('https://resources.download.minecraft.net')
+          ) {
+            url = url.replaceAll(
+              'https://resources.download.minecraft.net',
+              'https://p-rdmc.metacraft.cc'
+            );
           }
         }
         try {
@@ -76,18 +82,21 @@ export const downloadInstanceFiles = async (
 const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
   try {
     const filePath = path.dirname(fileName);
-    try {
-      await fs.access(fileName);
-      if (legacyPath) await fs.access(legacyPath);
-      const checksum = await computeFileHash(fileName);
-      const legacyChecksum = legacyPath && (await computeFileHash(legacyPath));
-      if (checksum === sha1 && (!legacyPath || legacyChecksum === sha1)) {
-        return true;
-      }
-    } catch {
-      await makeDir(filePath);
-      if (legacyPath) await makeDir(path.dirname(legacyPath));
-    }
+    // try {
+    //   await fs.access(fileName);
+    //   if (legacyPath) await fs.access(legacyPath);
+    //   const checksum = await computeFileHash(fileName);
+    //   const legacyChecksum = legacyPath && (await computeFileHash(legacyPath));
+    //   if (checksum === sha1 && (!legacyPath || legacyChecksum === sha1)) {
+    //     return true;
+    //   }
+    // } catch {
+    //   await makeDir(filePath);
+    //   if (legacyPath) await makeDir(path.dirname(legacyPath));
+    // }
+
+    await makeDir(filePath);
+    if (legacyPath) await makeDir(path.dirname(legacyPath));
 
     const { data } = await axios.get(url, {
       responseType: 'stream',

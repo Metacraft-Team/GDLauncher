@@ -6,14 +6,13 @@ import {
   FORGESVC_URL,
   MC_MANIFEST_URL,
   FABRIC_APIS,
-  JAVA_MANIFEST_URL,
+  JAVA17_MANIFEST_URL,
   IMGUR_CLIENT_ID,
   MICROSOFT_LIVE_LOGIN_URL,
   MICROSOFT_XBOX_LOGIN_URL,
   MICROSOFT_XSTS_AUTH_URL,
   MINECRAFT_SERVICES_URL,
   FTB_API_URL,
-  JAVA16_MANIFEST_URL,
   GDL_SERVE_API,
   METACRAFT_SERVICES_URL
 } from './utils/constants';
@@ -280,8 +279,8 @@ export const getFabricManifest = () => {
   return axios.get(url);
 };
 
-export const getJava16Manifest = () => {
-  const url = JAVA16_MANIFEST_URL;
+export const getJava17Manifest = () => {
+  const url = JAVA17_MANIFEST_URL;
   return axios.get(url);
 };
 

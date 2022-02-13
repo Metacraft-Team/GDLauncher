@@ -9,22 +9,27 @@ import { promisify } from 'util';
 import { downloadFile } from '../../app/desktop/utils/downloader';
 import { convertOSToJavaFormat, extractAll } from '../../app/desktop/utils';
 import { _getTempPath } from '../utils/selectors';
-import { updateJava16Path, updateJavaPath } from '../reducers/settings/actions';
+import { updateJavaPath, updateJava17Path } from '../reducers/settings/actions';
 
 const useAutomaticSetupJava = ({ shouldInstall }) => {
   const [downloadPercentage, setDownloadPercentage] = useState(0);
   const [currentSubStep, setCurrentSubStep] = useState('Downloading Java');
   const [currentStepPercentage, setCurrentStepPercentage] = useState(0);
-  const java16Manifest = useSelector(state => state.app.java16Manifest);
+  const java17Manifest = useSelector(state => state.app.java17Manifest);
   const userData = useSelector(state => state.userData);
   const tempFolder = useSelector(_getTempPath);
   const dispatch = useDispatch();
 
-  const javaToInstall = [16];
+  const javaToInstall = [17];
 
   const installJava = async () => {
     const javaOs = convertOSToJavaFormat(process.platform);
-    const java16Meta = java16Manifest.find(v => v.os === javaOs);
+    const java17Meta = java17Manifest.find(
+      v =>
+        v.os === javaOs &&
+        v.architecture === 'x64' &&
+        (v.binary_type === 'jre' || v.binary_type === 'jdk')
+    );
 
     const totalExtractionSteps = process.platform !== 'win32' ? 2 : 1;
     const totalSteps = (totalExtractionSteps + 1) * javaToInstall.length;
@@ -41,7 +46,7 @@ const useAutomaticSetupJava = ({ shouldInstall }) => {
         version_data: { openjdk_version: version },
         binary_link: url,
         release_name: releaseName
-      } = java16Meta;
+      } = java17Meta;
       const javaBaseFolder = path.join(userData, 'java');
 
       await fse.remove(path.join(javaBaseFolder, version));
@@ -136,7 +141,7 @@ const useAutomaticSetupJava = ({ shouldInstall }) => {
     }
 
     dispatch(updateJavaPath(null));
-    dispatch(updateJava16Path(null));
+    dispatch(updateJava17Path(null));
     setCurrentSubStep(`Java is ready!`);
     setDownloadPercentage(100);
     setCurrentStepPercentage(100);

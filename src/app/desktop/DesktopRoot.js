@@ -28,7 +28,7 @@ import RouteBackground from '../../common/components/RouteBackground';
 import ga from '../../common/utils/analytics';
 import routes from './utils/routes';
 import { _getCurrentAccount } from '../../common/utils/selectors';
-import { isLatestJavaDownloaded, isLocalJava16Exist } from './utils';
+import { isLatestJavaDownloaded, isLocalJava17Exist } from './utils';
 import SystemNavbar from './components/SystemNavbar';
 import useTrackIdle from './utils/useTrackIdle';
 import { openModal } from '../../common/reducers/modals/actions';
@@ -58,7 +58,7 @@ function DesktopRoot({ store }) {
   const dispatch = useDispatch();
   const currentAccount = useSelector(_getCurrentAccount);
   const clientToken = useSelector(state => state.app.clientToken);
-  const java16Path = useSelector(state => state.settings.java.path16);
+  const java17Path = useSelector(state => state.settings.java.path17);
   const location = useSelector(state => state.router.location);
   const shouldShowDiscordRPC = useSelector(state => state.settings.discordRPC);
 
@@ -87,20 +87,20 @@ function DesktopRoot({ store }) {
 
     const manifests = await dispatch(initManifests());
 
-    let isJava16Valid = java16Path;
+    let isJava17Valid = java17Path;
 
-    const isLocalJava16Valid = await isLocalJava16Exist();
+    const isLocalJava17Valid = await isLocalJava17Exist();
 
-    if (!java16Path && !isLocalJava16Valid) {
-      ({ isValid: isJava16Valid } = await isLatestJavaDownloaded(
+    if (!java17Path && !isLocalJava17Valid) {
+      ({ isValid: isJava17Valid } = await isLatestJavaDownloaded(
         manifests,
         userData,
         true,
-        16
+        17
       ));
     }
 
-    if (!isLocalJava16Valid && !isJava16Valid) {
+    if (!isLocalJava17Valid && !isJava17Valid) {
       dispatch(openModal('JavaSetup', { preventClose: true }));
 
       // Super duper hacky solution to await the modal to be closed...

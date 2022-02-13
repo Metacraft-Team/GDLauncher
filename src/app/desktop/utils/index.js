@@ -264,7 +264,7 @@ export const getFilteredVersions = (
   return versions;
 };
 
-export const isLocalJava16Exist = async () => {
+export const isLocalJava17Exist = async () => {
   try {
     const log = await promisify(exec)(`java -version`);
 
@@ -272,7 +272,7 @@ export const isLocalJava16Exist = async () => {
 
     const [, version] = log?.stderr.match(javaVersionRegexp);
 
-    const isValid = semver.gte(version, '16.0.0');
+    const isValid = semver.gte(version, '17.0.0');
 
     return isValid;
   } catch (err) {
@@ -290,11 +290,16 @@ export const isLatestJavaDownloaded = async (
   const javaOs = convertOSToJavaFormat(process.platform);
   let log = null;
 
-  const isJava16 = version === 16;
+  const isJava17 = version === 17;
 
-  const manifest = isJava16 ? meta.java16 : meta.java;
+  const manifest = isJava17 ? meta.java17 : meta.java;
 
-  const javaMeta = manifest.find(v => v.os === javaOs);
+  const javaMeta = manifest.find(
+    v =>
+      v.os === javaOs &&
+      v.architecture === 'x64' &&
+      (v.binary_type === 'jre' || v.binary_type === 'jdk')
+  );
   const javaFolder = path.join(
     userData,
     'java',

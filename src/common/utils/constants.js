@@ -6,8 +6,8 @@ export const GDL_LEGACYJAVAFIXER_MOD_URL =
   'https://gdevs.io/legacyjavafixer-1.0.jar';
 export const MOJANG_APIS = 'https://authserver.mojang.com';
 export const JAVA_MANIFEST_URL = 'https://cdn.assets-gdevs.com/openjdk8.json';
-export const JAVA16_MANIFEST_URL =
-  'https://api.test.metacraft.cc/configs/openjdk16.json';
+export const JAVA17_MANIFEST_URL =
+  'https://api.test.metacraft.cc/configs/openjdk17.json';
 export const MAVEN_REPO = 'http://central.maven.org/maven2';
 export const MC_LIBRARIES_URL = 'https://libraries.minecraft.net';
 export const FORGESVC_URL = 'https://addons-ecs.forgesvc.net/api/v2';
@@ -24,8 +24,8 @@ export const FABRIC = 'fabric';
 export const FORGE = 'forge';
 export const VANILLA = 'vanilla';
 
-export const FABRIC_LOADER_VERSION = '0.12.12';
-export const MC_VERSION = '1.17.1';
+export const FABRIC_LOADER_VERSION = '0.13.1';
+export const MC_VERSION = '1.18.1';
 
 export const CURSEFORGE = 'curseforge';
 export const FTB = 'ftb';

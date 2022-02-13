@@ -15,7 +15,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Slider, Button, Input, Switch, Select } from 'antd';
 import {
-  updateJava16Path,
+  updateJava17Path,
   updateJavaArguments,
   updateJavaMemory,
   updateJavaPath,
@@ -126,9 +126,9 @@ export default function MyAccountPreferences() {
   const javaArgs = useSelector(state => state.settings.java.args);
   const javaMemory = useSelector(state => state.settings.java.memory);
   const javaPath = useSelector(state => _getJavaPath(state)(8));
-  const java16Path = useSelector(state => _getJavaPath(state)(16));
+  const java17Path = useSelector(state => _getJavaPath(state)(17));
   const customJavaPath = useSelector(state => state.settings.java.path);
-  const customJava16Path = useSelector(state => state.settings.java.path16);
+  const customJava17Path = useSelector(state => state.settings.java.path17);
   const mcStartupMethod = useSelector(state => state.settings.mcStartupMethod);
   const mcResolution = useSelector(
     state => state.settings.minecraftSettings.resolution
@@ -180,16 +180,16 @@ export default function MyAccountPreferences() {
           onChange={c => {
             if (c) {
               dispatch(updateJavaPath(null));
-              dispatch(updateJava16Path(null));
+              dispatch(updateJava17Path(null));
             } else {
               dispatch(updateJavaPath(javaPath));
-              dispatch(updateJava16Path(java16Path));
+              dispatch(updateJava17Path(java17Path));
             }
           }}
-          checked={!customJavaPath && !customJava16Path}
+          checked={!customJavaPath && !customJava17Path}
         />
       </AutodetectPath>
-      {customJavaPath && customJava16Path && (
+      {customJavaPath && customJava17Path && (
         <>
           <div
             css={`
@@ -254,7 +254,7 @@ export default function MyAccountPreferences() {
                 text-align: left;
               `}
             >
-              Java 16
+              Java 17
             </h3>
             <div
               css={`
@@ -273,12 +273,12 @@ export default function MyAccountPreferences() {
                 `}
                 onChange={e => {
                   dispatch(
-                    updateJava16Path(
+                    updateJava17Path(
                       e.target.value === '' ? null : e.target.value
                     )
                   );
                 }}
-                value={customJava16Path}
+                value={customJava17Path}
               />
               <StyledButtons
                 color="primary"
@@ -288,7 +288,7 @@ export default function MyAccountPreferences() {
                     javaPath
                   );
                   if (!filePaths[0] || canceled) return;
-                  dispatch(updateJava16Path(filePaths[0]));
+                  dispatch(updateJava17Path(filePaths[0]));
                 }}
               >
                 <FontAwesomeIcon icon={faFolder} />

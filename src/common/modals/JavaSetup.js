@@ -22,26 +22,26 @@ import {
   unmountModal,
   mountModal
 } from '../reducers/modals/actions';
-import { updateJava16Path, updateJavaPath } from '../reducers/settings/actions';
+import { updateJavaPath, updateJava17Path } from '../reducers/settings/actions';
 import { UPDATE_MODAL } from '../reducers/modals/actionTypes';
 
 const JavaSetup = props => {
   const { checkLatestJavaDownloaded = false } = props;
 
-  const [isJava16Downloaded, setIsJava16Downloaded] = useState(null);
-  const [java16Log, setJava16Log] = useState(null);
-  const java16Manifest = useSelector(state => state.app.java16Manifest);
+  const [isJava17Downloaded, setIsJava17Downloaded] = useState(null);
+  const [java17Log, setJava17Log] = useState(null);
+  const java17Manifest = useSelector(state => state.app.java17Manifest);
   const userData = useSelector(state => state.userData);
   const manifests = {
-    java16: java16Manifest
+    java17: java17Manifest
   };
 
   useEffect(() => {
     if (checkLatestJavaDownloaded) {
-      isLatestJavaDownloaded(manifests, userData, true, 16)
+      isLatestJavaDownloaded(manifests, userData, true, 17)
         .then(e => {
-          setIsJava16Downloaded(e?.isValid);
-          return setJava16Log(e?.log);
+          setIsJava17Downloaded(e?.isValid);
+          return setJava17Log(e?.log);
         })
         .catch(err => console.error(err));
     }
@@ -74,8 +74,8 @@ const JavaSetup = props => {
             Java Setup
           </div>
           <AutomaticSetup
-            isJava16Downloaded={isJava16Downloaded}
-            java16Log={java16Log}
+            isJava17Downloaded={isJava17Downloaded}
+            java17Log={java17Log}
           />
         </>
       </Transition>
@@ -83,11 +83,11 @@ const JavaSetup = props => {
   );
 };
 
-const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
+const AutomaticSetup = ({ isJava17Downloaded, java17Log }) => {
   const [downloadPercentage, setDownloadPercentage] = useState(0);
   const [currentSubStep, setCurrentSubStep] = useState('Downloading Java');
   const [currentStepPercentage, setCurrentStepPercentage] = useState(0);
-  const java16Manifest = useSelector(state => state.app.java16Manifest);
+  const java17Manifest = useSelector(state => state.app.java17Manifest);
   const userData = useSelector(state => state.userData);
   const tempFolder = useSelector(_getTempPath);
   const modals = useSelector(state => state.modals);
@@ -121,11 +121,16 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
   //   }
   // }, []);
 
-  if (!isJava16Downloaded) javaToInstall.push(16);
+  if (!isJava17Downloaded) javaToInstall.push(17);
 
   const installJava = async () => {
     const javaOs = convertOSToJavaFormat(process.platform);
-    const java16Meta = java16Manifest.find(v => v.os === javaOs);
+    const java17Meta = java17Manifest.find(
+      v =>
+        v.os === javaOs &&
+        v.architecture === 'x64' &&
+        (v.binary_type === 'jre' || v.binary_type === 'jdk')
+    );
 
     const totalExtractionSteps = process.platform !== 'win32' ? 2 : 1;
     const totalSteps = (totalExtractionSteps + 1) * javaToInstall.length;
@@ -142,7 +147,7 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
         version_data: { openjdk_version: version },
         binary_link: url,
         release_name: releaseName
-      } = java16Meta;
+      } = java17Meta;
       const javaBaseFolder = path.join(userData, 'java');
 
       await fse.remove(path.join(javaBaseFolder, version));
@@ -242,13 +247,13 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
     }
 
     dispatch(updateJavaPath(null));
-    dispatch(updateJava16Path(null));
+    dispatch(updateJava17Path(null));
     setCurrentSubStep(`Java is ready!`);
     ipcRenderer.invoke('update-progress-bar', -1);
     setDownloadPercentage(100);
     setCurrentStepPercentage(100);
     await new Promise(resolve => setTimeout(resolve, 2000));
-    if (!java16Log) dispatch(closeModal());
+    if (!java17Log) dispatch(closeModal());
   };
 
   useEffect(() => {
@@ -320,12 +325,12 @@ const AutomaticSetup = ({ isJava16Downloaded, java16Log }) => {
               margin-bottom: 10px;
             `}
           >
-            <h3>Java 16 details:</h3>
-            <code>{java16Log}</code>
+            <h3>Java 17 details:</h3>
+            <code>{java17Log}</code>
           </div>
         </div>
       )}
-      {java16Log && (
+      {java17Log && (
         <Button
           css={`
             position: absolute;

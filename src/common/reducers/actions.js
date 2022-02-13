@@ -48,7 +48,7 @@ import {
   getFabricJson,
   getFabricManifest,
   getFTBModpackVersionData,
-  getJava16Manifest,
+  getJava17Manifest,
   getMcManifest,
   getMcExtraDependency,
   mcAuthenticate,
@@ -136,11 +136,29 @@ export function initManifests() {
     };
 
     const getMcExtraDependencies = async () => {
-      const { mods, resourcepacks, shaderpacks } = (
-        await getMcExtraDependency()
-      ).data;
+      const {
+        mods,
+        resourcepacks,
+        shaderpacks,
+        '': options
+      } = (await getMcExtraDependency()).data;
 
       const prevExtraDependencies = app.extraDependencies;
+
+      Object.keys(options).forEach(key => {
+        if (
+          options[key] &&
+          prevExtraDependencies.options &&
+          prevExtraDependencies.options[key]
+        ) {
+          const needUpgrade = !eq(
+            coerce(options[key].version),
+            coerce(prevExtraDependencies.options[key].version)
+          );
+
+          options[key].needUpgrade = needUpgrade;
+        }
+      });
 
       Object.keys(mods).forEach(key => {
         if (
@@ -190,7 +208,8 @@ export function initManifests() {
       const data = {
         mods,
         resourcepacks,
-        shaderpacks
+        shaderpacks,
+        options
       };
 
       dispatch({
@@ -199,19 +218,18 @@ export function initManifests() {
       });
       return data;
     };
-
-    const getJava16ManifestVersions = async () => {
-      const java = (await getJava16Manifest()).data;
+    const getJava17ManifestVersions = async () => {
+      const java = (await getJava17Manifest()).data;
       dispatch({
-        type: ActionTypes.UPDATE_JAVA16_MANIFEST,
+        type: ActionTypes.UPDATE_JAVA17_MANIFEST,
         data: java
       });
       return java;
     };
     // Using reflect to avoid rejection
-    const [fabric, java16, extraDependencies] = await Promise.all([
+    const [fabric, java17, extraDependencies] = await Promise.all([
       reflect(getFabricVersions()),
-      reflect(getJava16ManifestVersions()),
+      reflect(getJava17ManifestVersions()),
       reflect(getMcExtraDependencies())
     ]);
 
@@ -222,7 +240,7 @@ export function initManifests() {
     return {
       mc: mc || app.vanillaManifest,
       fabric: fabric.status ? fabric.v : app.fabricManifest,
-      java16: java16.status ? java16.v : app.java16Manifest,
+      java17: java17.status ? java17.v : app.java17Manifest,
       extraDependencies
     };
   };
@@ -1204,12 +1222,21 @@ export function downloadExtraDependencies(
         extraDependencies: {
           mods: modsJson,
           resourcepacks: resourcepacksJson,
-          shaderpacks: shaderpacksJson
+          shaderpacks: shaderpacksJson,
+          options: optionsJson
         }
       }
     } = state;
 
     dispatch(updateDownloadStatus(instanceName, loadingText));
+
+    const options = Object.keys(optionsJson).map(key => {
+      return {
+        path: path.join(_getInstancesPath(state), instanceName, key),
+        url: optionsJson[key].url,
+        version: optionsJson[key].version
+      };
+    });
 
     const mods = Object.keys(modsJson).map(key => {
       return {
@@ -1247,11 +1274,17 @@ export function downloadExtraDependencies(
       };
     });
 
+    console.log('options: ', options);
     console.log('mods: ', mods);
     console.log('resourcepacks: ', resourcepacks);
     console.log('shaderpacks: ', shaderpacks);
 
-    const dependencies = [...mods, ...resourcepacks, ...shaderpacks];
+    const dependencies = [
+      ...mods,
+      ...resourcepacks,
+      ...shaderpacks,
+      ...options
+    ];
 
     let prev = 0;
     const updatePercentage = downloaded => {
@@ -1431,8 +1464,6 @@ export function downloadInstance(instanceName) {
       libraries,
       path.join(_getInstancesPath(state), instanceName),
       percent => {
-        // eslint-disable-next-line no-debugger
-        debugger;
         const progress = parseInt(percent, 10);
 
         if (progress !== prev) {
@@ -2064,12 +2095,12 @@ export function getJavaVersionForMCVersion(mcVersion) {
     const { versions } = app?.vanillaManifest || {};
     if (versions) {
       const version = versions.find(v => v.id === mcVersion);
-      const java16InitialDate = new Date('2021-05-27T09:39:21+00:00');
-      if (new Date(version?.releaseTime) < java16InitialDate) {
+      const java17sInitialDate = new Date('2021-12-15T16:10:33+00:00');
+      if (new Date(version?.releaseTime) < java17sInitialDate) {
         return 8;
       }
     }
-    return 16;
+    return 17;
   };
 }
 

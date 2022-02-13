@@ -49,9 +49,9 @@ export const _getJavaPath = createSelector(
   (javaManifest, java, userData) => {
     // version
     return memoize(() => {
-      const manifest = javaManifest.java16Manifest;
+      const manifest = javaManifest.java17Manifest;
 
-      const customJava = java.path16;
+      const customJava = java.path17;
 
       const javaOs = convertOSToJavaFormat(process.platform);
       const javaMeta = manifest.find(
