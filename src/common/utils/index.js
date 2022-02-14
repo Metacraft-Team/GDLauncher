@@ -130,3 +130,20 @@ export const convertMinutesToHumanTime = minutes => {
       return '';
   }
 };
+
+export const toStandardVersion = version => {
+  const regExp = /(\.0+)(?=\d*)/g;
+
+  const newVersion = version.replace(regExp, '.');
+
+  console.log(newVersion);
+};
+
+export const lt = (versionA, versionB) => {
+  const versionAArray = versionA.split('.');
+  const versionBArray = versionB.split('.');
+
+  return versionAArray.some((a, index) => {
+    return parseInt(a, 10) < parseInt(versionBArray[index], 10);
+  });
+};

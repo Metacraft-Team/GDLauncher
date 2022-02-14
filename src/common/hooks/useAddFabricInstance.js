@@ -108,7 +108,6 @@ const useAddFabricInstance = ({
           )
         );
       }
-      return;
     }
 
     const initTimestamp = Date.now();

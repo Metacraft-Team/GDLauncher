@@ -1,7 +1,10 @@
 import { createSelector } from 'reselect';
 import path from 'path';
 import memoize from 'lodash/memoize';
-import { convertOSToJavaFormat } from '../../app/desktop/utils';
+import {
+  convertOSToJavaFormat,
+  isLocalJava17Exist
+} from '../../app/desktop/utils';
 
 const _instances = state => state.instances;
 const _accounts = state => state.app.accounts;
@@ -48,7 +51,7 @@ export const _getJavaPath = createSelector(
   _userData,
   (javaManifest, java, userData) => {
     // version
-    return memoize(() => {
+    return memoize(async () => {
       const manifest = javaManifest.java17Manifest;
 
       const customJava = java.path17;
@@ -58,15 +61,19 @@ export const _getJavaPath = createSelector(
         version =>
           version.os === javaOs &&
           version.architecture === 'x64' &&
-          version.binary_type === 'jre'
+          (version.binary_type === 'jre' || version.binary_type === 'jdk')
       );
+
       const {
         version_data: { openjdk_version: version }
       } = javaMeta;
       const filename = process.platform === 'win32' ? 'java.exe' : 'java';
 
       return (
-        customJava || path.join(userData, 'java', version, 'bin', filename)
+        customJava ||
+        ((await isLocalJava17Exist())
+          ? 'java'
+          : path.join(userData, 'java', version, 'bin', filename))
       );
     });
   }

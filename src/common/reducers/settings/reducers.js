@@ -72,7 +72,7 @@ function potatoPcMode(state = false, action) {
   }
 }
 
-function showNews(state = true, action) {
+function showNews(state = false, action) {
   switch (action.type) {
     case ActionTypes.UPDATE_SHOW_NEWS:
       return action.value;

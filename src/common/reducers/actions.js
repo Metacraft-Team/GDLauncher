@@ -6,7 +6,6 @@ import { machineId } from 'node-machine-id';
 import fse from 'fs-extra';
 import coerce from 'semver/functions/coerce';
 import gte from 'semver/functions/gte';
-import lt from 'semver/functions/lt';
 import gt from 'semver/functions/gt';
 import eq from 'semver/functions/eq';
 import log from 'electron-log';
@@ -105,7 +104,12 @@ import {
   downloadFile,
   downloadInstanceFiles
 } from '../../app/desktop/utils/downloader';
-import { getFileMurmurHash2, removeDuplicates } from '../utils';
+import {
+  toStandardVersion,
+  getFileMurmurHash2,
+  removeDuplicates,
+  lt
+} from '../utils';
 import { UPDATE_CONCURRENT_DOWNLOADS } from './settings/actionTypes';
 import { UPDATE_MODAL } from './modals/actionTypes';
 import PromiseQueue from '../../app/desktop/utils/PromiseQueue';
@@ -150,9 +154,9 @@ export function initManifests() {
           prevExtraDependencies.options &&
           prevExtraDependencies.options[key]
         ) {
-          const needUpgrade = !eq(
-            coerce(options[key].version),
-            coerce(prevExtraDependencies.options[key].version)
+          const needUpgrade = lt(
+            prevExtraDependencies.options[key].version,
+            options[key].version
           );
 
           options[key].needUpgrade = needUpgrade;
@@ -165,9 +169,9 @@ export function initManifests() {
           prevExtraDependencies.mods &&
           prevExtraDependencies.mods[key]
         ) {
-          const needUpgrade = !eq(
-            coerce(mods[key].version),
-            coerce(prevExtraDependencies.mods[key].version)
+          const needUpgrade = lt(
+            prevExtraDependencies.mods[key].version,
+            mods[key].version
           );
 
           mods[key].needUpgrade = needUpgrade;
@@ -180,9 +184,9 @@ export function initManifests() {
           prevExtraDependencies.resourcepacks &&
           prevExtraDependencies.resourcepacks[key]
         ) {
-          const needUpgrade = !eq(
-            coerce(resourcepacks[key].version),
-            coerce(prevExtraDependencies.resourcepacks[key].version)
+          const needUpgrade = lt(
+            prevExtraDependencies.resourcepacks[key].version,
+            resourcepacks[key].version
           );
 
           resourcepacks[key].needUpgrade = needUpgrade;
@@ -195,9 +199,9 @@ export function initManifests() {
           prevExtraDependencies.shaderpacks &&
           prevExtraDependencies.shaderpacks[key]
         ) {
-          const needUpgrade = !eq(
-            coerce(shaderpacks[key].version),
-            coerce(prevExtraDependencies.shaderpacks[key].version)
+          const needUpgrade = lt(
+            prevExtraDependencies.shaderpacks[key].version,
+            shaderpacks[key].version
           );
 
           shaderpacks[key].needUpgrade = needUpgrade;
@@ -2092,7 +2096,7 @@ export function getJavaVersionForMCVersion(mcVersion) {
     const { versions } = app?.vanillaManifest || {};
     if (versions) {
       const version = versions.find(v => v.id === mcVersion);
-      const java17sInitialDate = new Date('2021-12-15T16:10:33+00:00');
+      const java17sInitialDate = new Date('2021-09-14');
       if (new Date(version?.releaseTime) < java17sInitialDate) {
         return 8;
       }
@@ -2128,9 +2132,8 @@ export function launchInstance(instanceName) {
 
     ipcRenderer.invoke('update-discord-rpc', discordRPCDetails);
 
-    const defaultJavaPathVersion = _getJavaPath(state)(
-      dispatch(getJavaVersionForMCVersion(loader?.mcVersion))
-    );
+    const defaultJavaPathVersion = await _getJavaPath(state)();
+
     const javaPath = customJavaPath || defaultJavaPathVersion;
 
     const instancePath = path.join(_getInstancesPath(state), instanceName);
