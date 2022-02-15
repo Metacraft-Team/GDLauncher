@@ -11,7 +11,7 @@ import {
 import { Button, Space } from 'antd';
 import { useKey } from 'rooks';
 import { loginMetamask } from '../../../common/reducers/actions';
-import { load } from '../../../common/reducers/loading/actions';
+import { load, loginViaETH } from '../../../common/reducers/loading/actions';
 import features from '../../../common/reducers/loading/features';
 import backgroundImg from '../../../common/assets/background.png';
 import whitepaperIcon from '../../../common/assets/whitepaper.png';
@@ -242,15 +242,14 @@ const Login = () => {
 
   const [setLoginFailed] = useState(false);
 
-  const loading = useSelector(
-    state => state.loading.accountAuthentication.isRequesting
-  );
+  const loading = useSelector(state => state.loading.isLoginViaEth);
 
   const openChromeWithMetamask = useCallback(() => {
     ipcRenderer.invoke('loginWithMetamask');
+    dispatch(loginViaETH(true));
 
     return true;
-  }, []);
+  }, [dispatch]);
 
   useKey(['Enter'], openChromeWithMetamask);
 
@@ -274,15 +273,17 @@ const Login = () => {
   }, [dispatch, params]);
 
   const handleCancel = useCallback(() => {
+    dispatch(loginViaETH(false));
     setConfirmAccount(false);
     // clear old account informations
     setParams(null);
-  }, [setConfirmAccount, setParams]);
+  }, [dispatch, setConfirmAccount, setParams]);
 
   useEffect(() => {
     ipcRenderer.on('receive-metamask-login-params', (e, received) => {
       console.log('authenticate ....');
 
+      dispatch(loginViaETH(false));
       setParams(received);
 
       setConfirmAccount(true);
@@ -291,10 +292,10 @@ const Login = () => {
     return () => {
       ipcRenderer.removeAllListeners('receive-metamask-login-params');
     };
-  }, [setParams]);
+  }, [dispatch, setParams]);
 
   return (
-    <Transition in={loading} timeout={300}>
+    <Transition timeout={300}>
       {transitionState => (
         <Container>
           <LeftSide transitionState={transitionState}>
@@ -356,13 +357,24 @@ const Login = () => {
                     <CancelButton onClick={handleCancel}>Cancel</CancelButton>
                   </>
                 ) : (
-                  <MetamaskLoginButton
-                    color="primary"
-                    onClick={openChromeWithMetamask}
-                  >
-                    Sign in with Metamask
-                    <FontAwesomeIcon icon={faExternalLinkAlt} />
-                  </MetamaskLoginButton>
+                  <>
+                    <MetamaskLoginButton
+                      color="primary"
+                      onClick={loading ? () => {} : openChromeWithMetamask}
+                    >
+                      {loading ? (
+                        'authing...'
+                      ) : (
+                        <>
+                          Sign in with Metamask
+                          <FontAwesomeIcon icon={faExternalLinkAlt} />
+                        </>
+                      )}
+                    </MetamaskLoginButton>
+                    {loading ? (
+                      <CancelButton onClick={handleCancel}>Cancel</CancelButton>
+                    ) : null}
+                  </>
                 )}
               </ButtonGroup>
               {isConfirmAccount ? null : (

@@ -20,6 +20,13 @@ export function received(feature) {
     feature
   };
 }
+
+export function loginViaETH(status) {
+  return {
+    type: ActionTypes.LOGIN_VIA_ETH,
+    data: status
+  };
+}
 export function catchError(feature, errorValue) {
   const isErrorObject = typeof errorValue === 'object' && errorValue !== null;
   const error = isErrorObject ? errorValue.message || errorValue : errorValue;
