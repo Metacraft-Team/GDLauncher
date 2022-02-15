@@ -24,12 +24,14 @@ import leftSideBg from '../../../common/assets/left-side-bg.svg';
 import formatAddress from '../../../common/utils/formatAddress';
 
 const SocialMediaContainer = styled.div`
-  margin-bottom: 40px;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  grid-row-gap: 32px;
-  grid-column-gap: 120px;
+  grid-row-gap: 24px;
+  grid-column-gap: 60px;
 `;
 
 const SocialMediaIcon = styled.div`
@@ -49,7 +51,7 @@ const SocialMediaIcon = styled.div`
 
 /** login & cancel button */
 const BaseButton = styled(Button)`
-  width: 400px;
+  width: 100%;
   height: 56px;
   color: #fff !important;
   border-radius: 15px;
@@ -66,8 +68,6 @@ const ButtonGroup = styled(Space)`
 const MetamaskLoginButton = styled(BaseButton)`
   position: relative;
   margin-top: 75px;
-  width: 400px;
-  height: 56px;
   background: ${props => props.theme.palette.blue[500]} !important;
 
   svg {
@@ -105,9 +105,8 @@ const AccountInfoLabel = styled.div`
 `;
 
 const AccountInfoContent = styled.div`
-  width: 400px;
+  width: 100%;
   height: 48px;
-  padding: 0 20px;
   background: #293649;
   border-radius: 15px;
   font-weight: 500;
@@ -140,9 +139,12 @@ const Container = styled.div`
 `;
 
 const LeftSide = styled.div`
+  display: flex;
+  flex-direction: column;
   position: relative;
-  flex: 0 0 600px;
-  padding: 20px 40px;
+  flex: 2;
+  max-width: 640px;
+  padding: 20px 60px;
   height: 100%;
   overflow-y: auto;
   transition: 0.3s ease-in-out;
@@ -158,10 +160,15 @@ const LeftSide = styled.div`
     margin-top: 1em;
     color: ${props => props.theme.palette.text.third};
   }
+
+  & .ant-space-item {
+    width: 100%;
+  }
 `;
 
 const Background = styled.div`
   position: relative;
+  flex: 3;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -201,7 +208,6 @@ const Content = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-bottom: 120px;
 `;
 
 const Footer = styled.div`
@@ -374,6 +380,7 @@ const Login = () => {
             <Footer>
               <SocialMediaContainer>
                 <a
+                  className="a1"
                   href="https://docs.metacraft.cc/white-paper/introduction/what-is-metacraft"
                   css={`
                     -webkit-app-region: no-drag;
@@ -386,6 +393,7 @@ const Login = () => {
                   </SocialMediaIcon>
                 </a>
                 <a
+                  className="a2"
                   href="https://twitter.com/MetaCraftCC"
                   css={`
                     -webkit-app-region: no-drag;
@@ -398,6 +406,7 @@ const Login = () => {
                   </SocialMediaIcon>
                 </a>
                 <a
+                  className="b1"
                   href="https://discord.com/invite/PvzFHa4QJd"
                   css={`
                     -webkit-app-region: no-drag;
@@ -410,6 +419,7 @@ const Login = () => {
                   </SocialMediaIcon>
                 </a>
                 <a
+                  className="b2"
                   href="https://github.com/Metacraft-Team"
                   css={`
                     -webkit-app-region: no-drag;
