@@ -142,7 +142,6 @@ export function initManifests() {
       let newData = (await getMcExtraDependency()).data;
 
       const prevExtraDependencies = app.extraDependencies;
-      console.log("getMcExtraDependencies", prevExtraDependencies.options, prevExtraDependencies.mods, newData)
 
       Object.keys(newData).forEach(filePath => {
         let item = newData[filePath];
@@ -155,11 +154,6 @@ export function initManifests() {
             const needUpgrade = lt(
               prevExtraDependencies[filePath][key].version,
               item[key].version
-            );
-            console.log(
-              "needUpgrade",
-              prevExtraDependencies.item[key].version,
-              item[key].version, needUpgrade
             );
             item[key].needUpgrade = needUpgrade;
           }
