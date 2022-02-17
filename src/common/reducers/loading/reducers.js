@@ -11,7 +11,8 @@ const defaultState = FEATURES.reduce(
       isRequesting: false,
       isReceived: false,
       error: null,
-      updated: null
+      updated: null,
+      isLoginViaEth: false
     }
   }),
   {}
@@ -62,6 +63,11 @@ function loading(state = defaultState, action) {
           error: null,
           updated: null
         }
+      };
+    case ActionTypes.LOGIN_VIA_ETH:
+      return {
+        ...state,
+        isLoginViaEth: action.data
       };
     default:
       return state;
