@@ -25,8 +25,21 @@ const {
   default: installExtension,
   REDUX_DEVTOOLS
 } = require('electron-devtools-installer');
-// const murmur = require('./native/murmur2');
-// const nsfw = require('./native/nsfw');
+
+let murmur;
+
+if (process.env.NODE_ENV === 'development')
+  murmur = null;
+else
+  murmur = require('./native/murmur2');
+
+let nsfw;
+if (process.env.NODE_ENV === 'development')
+  nsfw = null;
+else
+  nsfw = require('./native/nsfw');
+
+
 
 const fs = fss.promises;
 
@@ -664,24 +677,25 @@ ipcMain.handle('shutdown-discord-rpc', () => {
   discordRPC.shutdownRPC();
 });
 
-// ipcMain.handle('start-listener', async (e, dirPath) => {
-//   try {
-//     log.log('Trying to start listener');
-//     if (watcher) {
-//       await watcher.stop();
-//       watcher = null;
-//     }
-//     watcher = await nsfw(dirPath, events => {
-//       log.log(`Detected ${events.length} events from listener`);
-//       mainWindow.webContents.send('listener-events', events);
-//     });
-//     log.log('Started listener');
-//     return watcher.start();
-//   } catch (err) {
-//     log.error(err);
-//     return Promise.reject(err);
-//   }
-// });
+ipcMain.handle('start-listener', async (e, dirPath) => {
+  try {
+    log.log('Trying to start listener');
+    if (watcher) {
+      await watcher.stop();
+      watcher = null;
+    }
+    if (watcher)
+      watcher = await nsfw(dirPath, events => {
+        log.log(`Detected ${events.length} events from listener`);
+        mainWindow.webContents.send('listener-events', events);
+      });
+    log.log('Started listener');
+    return watcher.start();
+  } catch (err) {
+    log.error(err);
+    return Promise.reject(err);
+  }
+});
 
 ipcMain.handle('stop-listener', async () => {
   if (watcher) {
@@ -691,14 +705,17 @@ ipcMain.handle('stop-listener', async () => {
   }
 });
 
-// ipcMain.handle('calculateMurmur2FromPath', (e, filePath) => {
-//   return new Promise((resolve, reject) => {
-//     return murmur(filePath).then(v => {
-//       if (v.toString().length === 0) reject();
-//       return resolve(v);
-//     });
-//   });
-// });
+ipcMain.handle('calculateMurmur2FromPath', (e, filePath) => {
+  if (murmur)
+    return new Promise((resolve, reject) => {
+      return murmur(filePath).then(v => {
+        if (v.toString().length === 0) reject();
+        return resolve(v);
+      });
+    });
+  else
+    return Promise.resolve("");
+});
 
 // AutoUpdater
 
