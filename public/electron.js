@@ -680,18 +680,19 @@ ipcMain.handle('shutdown-discord-rpc', () => {
 });
 
 ipcMain.handle('start-listener', async (e, dirPath) => {
+  // dev can't load nsfw on MacOS M1 chip
+  if (isDev) return Promise.resolve();
   try {
     log.log('Trying to start listener');
     if (watcher) {
       await watcher.stop();
       watcher = null;
     }
-    if (watcher)
-      if (nsfw)
-        watcher = await nsfw(dirPath, events => {
-          log.log(`Detected ${events.length} events from listener`);
-          mainWindow.webContents.send('listener-events', events);
-        });
+    if (nsfw !== null)
+      watcher = await nsfw(dirPath, events => {
+        log.log(`Detected ${events.length} events from listener`);
+        mainWindow.webContents.send('listener-events', events);
+      });
     log.log('Started listener');
     return watcher.start();
   } catch (err) {
@@ -709,7 +710,7 @@ ipcMain.handle('stop-listener', async () => {
 });
 
 ipcMain.handle('calculateMurmur2FromPath', (e, filePath) => {
-  if (murmur)
+  if (murmur !== null)
     return new Promise((resolve, reject) => {
       return murmur(filePath).then(v => {
         if (v.toString().length === 0) reject();
