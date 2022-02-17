@@ -38,11 +38,11 @@ const SocialMediaIcon = styled.div`
   display: flex;
   align-items: center;
   color: #fff;
-  font-size: 20px;
+  font-size: 16px;
   cursor: pointer;
 
   > img {
-    margin-right: 8px;
+    margin-right: 16px;
     width: 50px;
     height: 50px;
     object-fit: cover;
@@ -150,9 +150,9 @@ const LeftSide = styled.div`
   transition: 0.3s ease-in-out;
   transform: translateX(
     ${({ transitionState }) =>
-      transitionState === 'entering' || transitionState === 'entered'
-        ? -300
-        : 0}px
+    transitionState === 'entering' || transitionState === 'entered'
+      ? -300
+      : 0}px
   );
   background: url('${leftSideBg}') 0 0 100% 100% no-repeat;
 
@@ -178,9 +178,9 @@ const Background = styled.div`
     transition: 0.3s ease-in-out;
     transform: translateX(
       ${({ transitionState }) =>
-        transitionState === 'entering' || transitionState === 'entered'
-          ? -300
-          : 0}px
+    transitionState === 'entering' || transitionState === 'entered'
+      ? -300
+      : 0}px
     );
     position: absolute;
     width: 100%;
@@ -360,7 +360,7 @@ const Login = () => {
                   <>
                     <MetamaskLoginButton
                       color="primary"
-                      onClick={loading ? () => {} : openChromeWithMetamask}
+                      onClick={loading ? () => { } : openChromeWithMetamask}
                     >
                       {loading ? (
                         'authing...'

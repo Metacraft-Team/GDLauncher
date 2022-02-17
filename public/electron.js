@@ -25,8 +25,8 @@ const {
   default: installExtension,
   REDUX_DEVTOOLS
 } = require('electron-devtools-installer');
-const murmur = require('./native/murmur2');
-const nsfw = require('./native/nsfw');
+// const murmur = require('./native/murmur2');
+// const nsfw = require('./native/nsfw');
 
 const fs = fss.promises;
 
@@ -110,45 +110,45 @@ app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
 const edit = [
   ...(process.platform === 'darwin'
     ? [
-        {
-          label: 'GDLauncher',
-          submenu: [
-            {
-              label: 'About GDLauncher',
-              role: 'about'
-            },
-            { type: 'separator' },
-            {
-              label: 'Services',
-              role: 'services',
-              submenu: []
-            },
-            { type: 'separator' },
-            {
-              label: 'Hide GDLauncher',
-              accelerator: 'Command+H',
-              role: 'hide'
-            },
-            {
-              label: 'Hide Others',
-              accelerator: 'Command+Alt+H',
-              role: 'hideOthers'
-            },
-            {
-              label: 'Show All',
-              role: 'unhide'
-            },
-            { type: 'separator' },
-            {
-              label: 'Quit GDLauncher',
-              accelerator: 'Command+Q',
-              click: () => {
-                app.quit();
-              }
+      {
+        label: 'GDLauncher',
+        submenu: [
+          {
+            label: 'About GDLauncher',
+            role: 'about'
+          },
+          { type: 'separator' },
+          {
+            label: 'Services',
+            role: 'services',
+            submenu: []
+          },
+          { type: 'separator' },
+          {
+            label: 'Hide GDLauncher',
+            accelerator: 'Command+H',
+            role: 'hide'
+          },
+          {
+            label: 'Hide Others',
+            accelerator: 'Command+Alt+H',
+            role: 'hideOthers'
+          },
+          {
+            label: 'Show All',
+            role: 'unhide'
+          },
+          { type: 'separator' },
+          {
+            label: 'Quit GDLauncher',
+            accelerator: 'Command+Q',
+            click: () => {
+              app.quit();
             }
-          ]
-        }
-      ]
+          }
+        ]
+      }
+    ]
     : []),
   {
     label: 'Edit',
@@ -664,24 +664,24 @@ ipcMain.handle('shutdown-discord-rpc', () => {
   discordRPC.shutdownRPC();
 });
 
-ipcMain.handle('start-listener', async (e, dirPath) => {
-  try {
-    log.log('Trying to start listener');
-    if (watcher) {
-      await watcher.stop();
-      watcher = null;
-    }
-    watcher = await nsfw(dirPath, events => {
-      log.log(`Detected ${events.length} events from listener`);
-      mainWindow.webContents.send('listener-events', events);
-    });
-    log.log('Started listener');
-    return watcher.start();
-  } catch (err) {
-    log.error(err);
-    return Promise.reject(err);
-  }
-});
+// ipcMain.handle('start-listener', async (e, dirPath) => {
+//   try {
+//     log.log('Trying to start listener');
+//     if (watcher) {
+//       await watcher.stop();
+//       watcher = null;
+//     }
+//     watcher = await nsfw(dirPath, events => {
+//       log.log(`Detected ${events.length} events from listener`);
+//       mainWindow.webContents.send('listener-events', events);
+//     });
+//     log.log('Started listener');
+//     return watcher.start();
+//   } catch (err) {
+//     log.error(err);
+//     return Promise.reject(err);
+//   }
+// });
 
 ipcMain.handle('stop-listener', async () => {
   if (watcher) {
@@ -691,14 +691,14 @@ ipcMain.handle('stop-listener', async () => {
   }
 });
 
-ipcMain.handle('calculateMurmur2FromPath', (e, filePath) => {
-  return new Promise((resolve, reject) => {
-    return murmur(filePath).then(v => {
-      if (v.toString().length === 0) reject();
-      return resolve(v);
-    });
-  });
-});
+// ipcMain.handle('calculateMurmur2FromPath', (e, filePath) => {
+//   return new Promise((resolve, reject) => {
+//     return murmur(filePath).then(v => {
+//       if (v.toString().length === 0) reject();
+//       return resolve(v);
+//     });
+//   });
+// });
 
 // AutoUpdater
 
@@ -744,8 +744,7 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       `ping 127.0.0.1 -n 1 > nul & robocopy "${path.join(
         tempFolder,
         'update'
-      )}" "." /MOV /E${
-        quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
+      )}" "." /MOV /E${quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
       }
         DEL "${path.join(tempFolder, updaterVbs)}"
         DEL "%~f0"
@@ -756,9 +755,9 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       path.join(tempFolder, updaterVbs),
       `Set WshShell = CreateObject("WScript.Shell") 
           WshShell.Run chr(34) & "${path.join(
-            tempFolder,
-            updaterBat
-          )}" & Chr(34), 0
+        tempFolder,
+        updaterBat
+      )}" & Chr(34), 0
           Set WshShell = Nothing
           `
     );
