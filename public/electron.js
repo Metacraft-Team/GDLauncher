@@ -26,15 +26,17 @@ const {
   REDUX_DEVTOOLS
 } = require('electron-devtools-installer');
 
-let murmur;
+const isDev = process.env.NODE_ENV === 'development';
+console.log("isDev", isDev);
 
-if (process.env.NODE_ENV === 'development')
+let murmur;
+if (isDev)
   murmur = null;
 else
   murmur = require('./native/murmur2');
 
 let nsfw;
-if (process.env.NODE_ENV === 'development')
+if (isDev)
   nsfw = null;
 else
   nsfw = require('./native/nsfw');
@@ -45,13 +47,13 @@ const fs = fss.promises;
 
 let mainWindow;
 let tray;
-let watcher;
+let watcher = null;
 
 const discordRPC = require('./discordRPC');
 
 const gotTheLock = app.requestSingleInstanceLock();
 
-const isDev = process.env.NODE_ENV === 'development';
+
 
 // 注册协议
 const PROTOCOL = 'metacraft';
@@ -685,10 +687,11 @@ ipcMain.handle('start-listener', async (e, dirPath) => {
       watcher = null;
     }
     if (watcher)
-      watcher = await nsfw(dirPath, events => {
-        log.log(`Detected ${events.length} events from listener`);
-        mainWindow.webContents.send('listener-events', events);
-      });
+      if (nsfw)
+        watcher = await nsfw(dirPath, events => {
+          log.log(`Detected ${events.length} events from listener`);
+          mainWindow.webContents.send('listener-events', events);
+        });
     log.log('Started listener');
     return watcher.start();
   } catch (err) {

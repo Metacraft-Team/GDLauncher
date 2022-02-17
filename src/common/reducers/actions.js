@@ -1354,7 +1354,7 @@ export function downloadInstance(instanceName) {
       state.settings.concurrentDownloads
     );
 
-    dispatch(updateDownloadStatus(instanceName, 'extracting game files...'));
+    dispatch(updateDownloadStatus(instanceName, 'Extracting game files...'));
 
     // Wait 400ms to avoid "The process cannot access the file because it is being used by another process."
     await new Promise(resolve => setTimeout(() => resolve(), 1000));
@@ -1384,8 +1384,7 @@ export function downloadInstance(instanceName) {
     }
 
     await dispatch(downloadExtraDependencies(instanceName));
-
-    dispatch(updateDownloadProgress(0));
+    dispatch(updateDownloadProgress(-1));
 
     // Be aware that from this line the installer lock might be unlocked!
 
