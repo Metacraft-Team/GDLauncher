@@ -139,87 +139,32 @@ export function initManifests() {
     };
 
     const getMcExtraDependencies = async () => {
-      const {
-        mods,
-        resourcepacks,
-        shaderpacks,
-        '': options
-      } = (await getMcExtraDependency()).data;
+      let newData = (await getMcExtraDependency()).data;
 
       const prevExtraDependencies = app.extraDependencies;
 
-      Object.keys(options).forEach(key => {
-        if (
-          options[key] &&
-          prevExtraDependencies.options &&
-          prevExtraDependencies.options[key]
-        ) {
-          const needUpgrade = lt(
-            prevExtraDependencies.options[key].version,
-            options[key].version
-          );
-
-          options[key].needUpgrade = needUpgrade;
-        }
+      Object.keys(newData).forEach(filePath => {
+        let item = newData[filePath];
+        Object.keys(item).forEach(key => {
+          if (
+            item[key] &&
+            prevExtraDependencies[filePath] &&
+            prevExtraDependencies[filePath][key]
+          ) {
+            const needUpgrade = lt(
+              prevExtraDependencies.item[key].version,
+              item[key].version
+            );
+            item[key].needUpgrade = needUpgrade;
+          }
+        });
       });
-
-      Object.keys(mods).forEach(key => {
-        if (
-          mods[key] &&
-          prevExtraDependencies.mods &&
-          prevExtraDependencies.mods[key]
-        ) {
-          const needUpgrade = lt(
-            prevExtraDependencies.mods[key].version,
-            mods[key].version
-          );
-
-          mods[key].needUpgrade = needUpgrade;
-        }
-      });
-
-      Object.keys(resourcepacks).forEach(key => {
-        if (
-          resourcepacks[key] &&
-          prevExtraDependencies.resourcepacks &&
-          prevExtraDependencies.resourcepacks[key]
-        ) {
-          const needUpgrade = lt(
-            prevExtraDependencies.resourcepacks[key].version,
-            resourcepacks[key].version
-          );
-
-          resourcepacks[key].needUpgrade = needUpgrade;
-        }
-      });
-
-      Object.keys(shaderpacks).forEach(key => {
-        if (
-          shaderpacks[key] &&
-          prevExtraDependencies.shaderpacks &&
-          prevExtraDependencies.shaderpacks[key]
-        ) {
-          const needUpgrade = lt(
-            prevExtraDependencies.shaderpacks[key].version,
-            shaderpacks[key].version
-          );
-
-          shaderpacks[key].needUpgrade = needUpgrade;
-        }
-      });
-
-      const data = {
-        mods,
-        resourcepacks,
-        shaderpacks,
-        options
-      };
 
       dispatch({
         type: ActionTypes.UPDATE_EXTRA_DEPENDENCIES,
-        data
+        newData
       });
-      return data;
+      return newData;
     };
     const getJava17ManifestVersions = async () => {
       const java = (await getJava17Manifest()).data;
@@ -1220,72 +1165,26 @@ export function downloadExtraDependencies(
     const state = getState();
     const {
       app: {
-        extraDependencies: {
-          mods: modsJson,
-          resourcepacks: resourcepacksJson,
-          shaderpacks: shaderpacksJson,
-          options: optionsJson
-        }
+        extraDependencies
       }
     } = state;
 
     dispatch(updateDownloadStatus(instanceName, loadingText));
 
-    const options = Object.keys(optionsJson).map(key => {
-      return {
-        path: path.join(_getInstancesPath(state), instanceName, key),
-        url: optionsJson[key].url,
-        version: optionsJson[key].version
-      };
+    let dependencies = [];
+    Object.keys(extraDependencies).map(filePath => {
+      const item = extraDependencies[filePath];
+      const deps = Object.keys(item).map(key => {
+        return {
+          path: path.join(_getInstancesPath(state), instanceName, filePath, key),
+          url: item[key].url,
+          version: item[key].version,
+          needUpgrade: item[key].needUpgrade
+        };
+      });
+      dependencies.push(...deps)
     });
 
-    const mods = Object.keys(modsJson).map(key => {
-      return {
-        path: path.join(_getInstancesPath(state), instanceName, 'mods', key),
-        url: modsJson[key].url,
-        version: modsJson[key].version
-      };
-    });
-
-    const resourcepacks = Object.keys(resourcepacksJson).map(key => {
-      return {
-        path: path.join(
-          _getInstancesPath(state),
-          instanceName,
-          'resourcepacks',
-          key
-        ),
-        url: resourcepacksJson[key].url,
-        version: resourcepacksJson[key].version
-      };
-    });
-
-    const shaderpacks = Object.keys(shaderpacksJson).map(key => {
-      const fileName = path.join(
-        _getInstancesPath(state),
-        instanceName,
-        'shaderpacks',
-        key
-      );
-
-      return {
-        path: fileName,
-        url: shaderpacksJson[key].url,
-        version: shaderpacksJson[key].version
-      };
-    });
-
-    console.log('options: ', options);
-    console.log('mods: ', mods);
-    console.log('resourcepacks: ', resourcepacks);
-    console.log('shaderpacks: ', shaderpacks);
-
-    const dependencies = [
-      ...mods,
-      ...resourcepacks,
-      ...shaderpacks,
-      ...options
-    ];
 
     let prev = 0;
     const updatePercentage = downloaded => {
