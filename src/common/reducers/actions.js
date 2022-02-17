@@ -142,7 +142,6 @@ export function initManifests() {
       let newData = (await getMcExtraDependency()).data;
 
       const prevExtraDependencies = app.extraDependencies;
-
       Object.keys(newData).forEach(filePath => {
         let item = newData[filePath];
         Object.keys(item).forEach(key => {
@@ -157,7 +156,7 @@ export function initManifests() {
             );
             item[key].needUpgrade = needUpgrade;
           }
-          else {
+          else if (item[key]) {
             item[key].needUpgrade = true;
           }
         });
@@ -165,7 +164,7 @@ export function initManifests() {
 
       dispatch({
         type: ActionTypes.UPDATE_EXTRA_DEPENDENCIES,
-        newData
+        data: newData
       });
       return newData;
     };
