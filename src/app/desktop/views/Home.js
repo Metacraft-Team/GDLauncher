@@ -11,7 +11,7 @@ import {
   _getCurrentAccount
   // _getInstances
 } from '../../../common/utils/selectors';
-import { extractFace } from '../utils';
+import { extractFace, isLatestJavaDownloaded } from '../utils';
 import { updateLastUpdateVersion } from '../../../common/reducers/actions';
 import { useAddFabricInstance } from '../../../common/hooks';
 import {
@@ -32,6 +32,10 @@ const Home = () => {
   const dispatch = useDispatch();
   const account = useSelector(_getCurrentAccount);
   const lastUpdateVersion = useSelector(state => state.app.lastUpdateVersion);
+  const userData = useSelector(state => state.userData);
+  const java17Path = useSelector(state => state.settings.java.path17);
+  const java17Manifest = useSelector(state => state.app.java17Manifest);
+
   const createInstance = useAddFabricInstance({
     instanceVersion: {
       loaderType: FABRIC,
@@ -46,18 +50,61 @@ const Home = () => {
 
   const [profileImage, setProfileImage] = useState(null);
 
+  const checkAndInstallJava = async () => {
+    const store = window.__store;
+
+    let isJava17Valid = java17Path;
+    if (!java17Path) {
+      ({ isValid: isJava17Valid } = await isLatestJavaDownloaded(
+        { java17: java17Manifest },
+        userData,
+        true,
+        17
+      ));
+    }
+
+    if (!isJava17Valid) {
+      dispatch(openModal('JavaSetup', { preventClose: true }));
+
+      // Super duper hacky solution to await the modal to be closed...
+      // Please forgive me
+      await new Promise(resolve => {
+        function checkModalStillOpen(state) {
+          return state.modals.find(v => v.modalType === 'JavaSetup');
+        }
+
+        let currentValue;
+        const unsubscribe = store.subscribe(() => {
+          const previousValue = currentValue;
+          currentValue = store.getState().modals.length;
+          if (previousValue !== currentValue) {
+            const stillOpen = checkModalStillOpen(store.getState());
+
+            if (!stillOpen) {
+              unsubscribe();
+              return resolve();
+            }
+          }
+        });
+      });
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       const appVersion = await ipcRenderer.invoke('getAppVersion');
       if (lastUpdateVersion !== appVersion) {
         dispatch(updateLastUpdateVersion(appVersion));
         dispatch(openModal('ChangeLogs'));
+      } else if (!java17Path) {
+        await checkAndInstallJava();
+        createInstance();
+      } else {
+        createInstance();
       }
     };
 
     init();
-
-    createInstance();
   }, []);
 
   useEffect(() => {

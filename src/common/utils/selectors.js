@@ -1,10 +1,7 @@
 import { createSelector } from 'reselect';
 import path from 'path';
 import memoize from 'lodash/memoize';
-import {
-  convertOSToJavaFormat,
-  isLocalJava17Exist
-} from '../../app/desktop/utils';
+import { convertOSToJavaFormat } from '../../app/desktop/utils';
 
 const _instances = state => state.instances;
 const _accounts = state => state.app.accounts;
@@ -70,10 +67,7 @@ export const _getJavaPath = createSelector(
       const filename = process.platform === 'win32' ? 'java.exe' : 'java';
 
       return (
-        customJava ||
-        ((await isLocalJava17Exist())
-          ? 'java'
-          : path.join(userData, 'java', version, 'bin', filename))
+        customJava || path.join(userData, 'java', version, 'bin', filename)
       );
     });
   }

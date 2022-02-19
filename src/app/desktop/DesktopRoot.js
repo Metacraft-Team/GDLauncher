@@ -89,9 +89,7 @@ function DesktopRoot({ store }) {
 
     let isJava17Valid = java17Path;
 
-    const isLocalJava17Valid = await isLocalJava17Exist();
-
-    if (!java17Path && !isLocalJava17Valid) {
+    if (!java17Path) {
       ({ isValid: isJava17Valid } = await isLatestJavaDownloaded(
         manifests,
         userData,
@@ -100,7 +98,7 @@ function DesktopRoot({ store }) {
       ));
     }
 
-    if (!isLocalJava17Valid && !isJava17Valid) {
+    if (!isJava17Valid) {
       dispatch(openModal('JavaSetup', { preventClose: true }));
 
       // Super duper hacky solution to await the modal to be closed...
