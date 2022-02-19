@@ -45,7 +45,7 @@ export const downloadInstanceFiles = async (
           ) {
             url = url.replaceAll(
               'https://resources.download.minecraft.net',
-              'https://p-rdmc.metacraft.cc'
+              'https://mc-lib-mirr.oss-accelerate.aliyuncs.com'
             );
           }
         }
