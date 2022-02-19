@@ -138,36 +138,6 @@ export function initManifests() {
       return fabric;
     };
 
-    const getMcExtraDependencies = async () => {
-      let newData = (await getMcExtraDependency()).data;
-
-      const prevExtraDependencies = app.extraDependencies;
-      Object.keys(newData).forEach(filePath => {
-        let item = newData[filePath];
-        Object.keys(item).forEach(key => {
-          if (
-            item[key] &&
-            prevExtraDependencies[filePath] &&
-            prevExtraDependencies[filePath][key]
-          ) {
-            const needUpgrade = lt(
-              prevExtraDependencies[filePath][key].version,
-              item[key].version
-            );
-            item[key].needUpgrade = needUpgrade;
-          }
-          else if (item[key]) {
-            item[key].needUpgrade = true;
-          }
-        });
-      });
-
-      dispatch({
-        type: ActionTypes.UPDATE_EXTRA_DEPENDENCIES,
-        data: newData
-      });
-      return newData;
-    };
     const getJava17ManifestVersions = async () => {
       const java = (await getJava17Manifest()).data;
       dispatch({
@@ -177,21 +147,19 @@ export function initManifests() {
       return java;
     };
     // Using reflect to avoid rejection
-    const [fabric, java17, extraDependencies] = await Promise.all([
+    const [fabric, java17] = await Promise.all([
       reflect(getFabricVersions()),
-      reflect(getJava17ManifestVersions()),
-      reflect(getMcExtraDependencies())
+      reflect(getJava17ManifestVersions())
     ]);
 
-    if (fabric.e || extraDependencies.e) {
-      console.error(fabric, extraDependencies);
+    if (fabric.e) {
+      console.error(fabric);
     }
 
     return {
       mc: mc || app.vanillaManifest,
       fabric: fabric.status ? fabric.v : app.fabricManifest,
-      java17: java17.status ? java17.v : app.java17Manifest,
-      extraDependencies
+      java17: java17.status ? java17.v : app.java17Manifest
     };
   };
 }
@@ -1165,23 +1133,43 @@ export function downloadExtraDependencies(
 ) {
   return async (dispatch, getState) => {
     const state = getState();
-    const {
-      app: {
-        extraDependencies
-      }
-    } = state;
 
     dispatch(updateDownloadStatus(instanceName, loadingText));
+
+    const extraDependenciesPath = path.join(
+      _getDataStorePath(state),
+      'extra_dependencies.json'
+    );
+
+    let prevExtraDependencies;
+    try {
+      prevExtraDependencies = await fse.readJson(extraDependenciesPath);
+    } catch (e) {
+      prevExtraDependencies = [];
+    }
+    let extraDependencies = (await getMcExtraDependency()).data;
 
     let dependencies = [];
     Object.keys(extraDependencies).map(filePath => {
       const item = extraDependencies[filePath];
       const deps = Object.keys(item).map(key => {
+        let needUpgrade = true;
+        if (
+          item[key] &&
+          prevExtraDependencies[filePath] &&
+          prevExtraDependencies[filePath][key]
+        ) {
+          needUpgrade = lt(
+            prevExtraDependencies[filePath][key].version,
+            item[key].version
+          );
+        }
+
         return {
           path: path.join(_getInstancesPath(state), instanceName, filePath, key),
           url: item[key].url,
           version: item[key].version,
-          needUpgrade: item[key].needUpgrade
+          needUpgrade: needUpgrade
         };
       });
       dependencies.push(...deps)
@@ -1198,12 +1186,18 @@ export function downloadExtraDependencies(
       }
     };
 
-    await downloadInstanceFiles(
+    const suceeded = await downloadInstanceFiles(
       dependencies,
       updatePercentage,
       state.settings.concurrentDownloads,
       1
     );
+    if (suceeded) {
+      await fse.outputJson(extraDependenciesPath, extraDependencies);
+    }
+    else {
+      // todo: notify user
+    }
   };
 }
 
@@ -1225,9 +1219,10 @@ export function downloadFabric(instanceName) {
     );
     try {
       fabricJson = await fse.readJson(fabricJsonPath);
+      // fabric is no hash check
+      return
     } catch (err) {
       fabricJson = (await getFabricJson(loader)).data;
-      await fse.outputJson(fabricJsonPath, fabricJson);
     }
 
     const libraries = librariesMapper(
@@ -1245,11 +1240,17 @@ export function downloadFabric(instanceName) {
       }
     };
 
-    await downloadInstanceFiles(
+    const suceeded = await downloadInstanceFiles(
       libraries,
       updatePercentage,
       state.settings.concurrentDownloads
     );
+    if (suceeded) {
+      await fse.outputJson(fabricJsonPath, fabricJson);
+    }
+    else {
+      // todo: notify user
+    }
   };
 }
 
@@ -1350,11 +1351,16 @@ export function downloadInstance(instanceName) {
       }
     };
 
-    await downloadInstanceFiles(
+    const suceeded = await downloadInstanceFiles(
       [...libraries, ...assets, mcMainFile],
       updatePercentage,
       state.settings.concurrentDownloads
     );
+    if (suceeded) {
+    }
+    else {
+      // todo: notify user
+    }
 
     dispatch(updateDownloadStatus(instanceName, 'Extracting game files...'));
 

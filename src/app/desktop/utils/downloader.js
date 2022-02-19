@@ -1,7 +1,7 @@
 import makeDir from 'make-dir';
 import fss from 'fs';
 import axios from 'axios';
-import pMap from 'p-map';
+import pMap, { pMapSkip } from 'p-map';
 import path from 'path';
 import adapter from 'axios/lib/adapters/http';
 import http from 'http';
@@ -17,23 +17,29 @@ export const downloadInstanceFiles = async (
   updatePercentageThreshold = 5
 ) => {
   let downloaded = 0;
-  await pMap(
+  let resault = await pMap(
     arr,
     async item => {
       let counter = 0;
       let res = false;
+
+      // remove file
       if (!item.url && item.path) {
         try {
           await fs.rm(item.path);
         } catch (e) {
           console.log(`remove ${item.path} error: `, e);
         }
+        return item;
       }
 
+      // skip file
       if (!item.path || !item.url || item.needUpgrade === false) {
         console.info('Skipping', item.url, item.needUpgrade);
-        return;
+        return item;
       }
+
+      // download file
       do {
         counter += 1;
         let { url } = item;
@@ -61,22 +67,34 @@ export const downloadInstanceFiles = async (
 
           if (res) {
             console.log('downloaded success: ', downloaded + 1, url);
-          } else if (counter === 100) {
-            console.log('downloaded fail: ', url);
+          } else if (counter >= 100) {
+            console.error('downloaded fail: ', url);
           }
         } catch (e) {
           console.log(e);
         }
       } while (!res && counter < 100);
-      downloaded += 1;
-      if (
-        (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
-        downloaded === arr.length
-      )
-        updatePercentage(downloaded);
+
+      // update percentage
+      if (counter >= 100) {
+        return pMapSkip
+      }
+      else {
+        downloaded += 1;
+        if (
+          (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
+          downloaded === arr.length
+        )
+          updatePercentage(downloaded);
+        return item
+      }
+
     },
     { concurrency: threads }
   );
+  console.log("downloadInstanceFiles", resault.length, arr.length)
+  if (resault.length < arr.length) return false;
+  else return true
 };
 
 const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
