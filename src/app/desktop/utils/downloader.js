@@ -17,7 +17,7 @@ export const downloadInstanceFiles = async (
   updatePercentageThreshold = 5
 ) => {
   let downloaded = 0;
-  let resault = await pMap(
+  const result = await pMap(
     arr,
     async item => {
       let counter = 0;
@@ -77,24 +77,28 @@ export const downloadInstanceFiles = async (
 
       // update percentage
       if (counter >= 100) {
-        return pMapSkip
-      }
-      else {
-        downloaded += 1;
-        if (
-          (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
-          downloaded === arr.length
-        )
-          updatePercentage(downloaded);
-        return item
+        return pMapSkip;
       }
 
+      downloaded += 1;
+      if (
+        (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
+        downloaded === arr.length
+      )
+        updatePercentage(downloaded);
+      return item;
     },
     { concurrency: threads }
   );
-  console.log("downloadInstanceFiles", resault.length, arr.length)
-  if (resault.length < arr.length) return false;
-  else return true
+  console.log(
+    'downloadInstanceFiles: ',
+    'exact download count ',
+    result.length,
+    'expect download count',
+    arr.length
+  );
+  if (result.length < arr.length) return false;
+  return true;
 };
 
 const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {

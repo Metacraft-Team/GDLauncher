@@ -4,7 +4,7 @@ import os from 'os';
 import fse from 'fs-extra';
 import { useSelector, useDispatch } from 'react-redux';
 import isBoolean from 'lodash/isBoolean';
-import { addToQueue, downloadExtraDependencies } from '../reducers/actions';
+import { addToQueue } from '../reducers/actions';
 import { closeModal, openModal } from '../reducers/modals/actions';
 import {
   downloadAddonZip,
@@ -98,17 +98,7 @@ const useAddFabricInstance = ({
 
     if (!version || !localInstanceName) return;
 
-    const isExists = await isInstanceAlreadyExists();
-    if (isExists) {
-      if (checkExtraDependenciesUpgrade()) {
-        await dispatch(
-          downloadExtraDependencies(
-            localInstanceName,
-            'Upgrading game files...'
-          )
-        );
-      }
-    }
+    const isExits = await isInstanceAlreadyExists();
 
     const initTimestamp = Date.now();
 
@@ -349,7 +339,8 @@ const useAddFabricInstance = ({
         addToQueue(localInstanceName, {
           loaderType: FABRIC,
           mcVersion: version?.mcVersion,
-          loaderVersion: version?.loaderVersion
+          loaderVersion: version?.loaderVersion,
+          status: isExits ? 'checking' : 'downloading'
         })
       );
     } else if (isForge) {

@@ -1147,9 +1147,9 @@ export function downloadExtraDependencies(
     } catch (e) {
       prevExtraDependencies = [];
     }
-    let extraDependencies = (await getMcExtraDependency()).data;
+    const extraDependencies = (await getMcExtraDependency()).data;
 
-    let dependencies = [];
+    const dependencies = [];
     Object.keys(extraDependencies).map(filePath => {
       const item = extraDependencies[filePath];
       const deps = Object.keys(item).map(key => {
@@ -1166,15 +1166,19 @@ export function downloadExtraDependencies(
         }
 
         return {
-          path: path.join(_getInstancesPath(state), instanceName, filePath, key),
+          path: path.join(
+            _getInstancesPath(state),
+            instanceName,
+            filePath,
+            key
+          ),
           url: item[key].url,
           version: item[key].version,
-          needUpgrade: needUpgrade
+          needUpgrade
         };
       });
-      dependencies.push(...deps)
+      dependencies.push(...deps);
     });
-
 
     let prev = 0;
     const updatePercentage = downloaded => {
@@ -1194,8 +1198,7 @@ export function downloadExtraDependencies(
     );
     if (suceeded) {
       await fse.outputJson(extraDependenciesPath, extraDependencies);
-    }
-    else {
+    } else {
       // todo: notify user
     }
   };
@@ -1206,7 +1209,14 @@ export function downloadFabric(instanceName) {
     const state = getState();
     const { loader } = _getCurrentDownloadItem(state);
 
-    dispatch(updateDownloadStatus(instanceName, 'Downloading fabric files...'));
+    dispatch(
+      updateDownloadStatus(
+        instanceName,
+        loader.status === 'checking'
+          ? 'Checking fabric files...'
+          : 'Downloading fabric files...'
+      )
+    );
 
     let fabricJson;
     const fabricJsonPath = path.join(
@@ -1220,7 +1230,7 @@ export function downloadFabric(instanceName) {
     try {
       fabricJson = await fse.readJson(fabricJsonPath);
       // fabric is no hash check
-      return
+      return;
     } catch (err) {
       fabricJson = (await getFabricJson(loader)).data;
     }
@@ -1247,8 +1257,7 @@ export function downloadFabric(instanceName) {
     );
     if (suceeded) {
       await fse.outputJson(fabricJsonPath, fabricJson);
-    }
-    else {
+    } else {
       // todo: notify user
     }
   };
@@ -1263,9 +1272,16 @@ export function downloadInstance(instanceName) {
       }
     } = state;
 
-    dispatch(updateDownloadStatus(instanceName, 'Downloading game files...'));
-
     const { loader, manifest } = _getCurrentDownloadItem(state);
+
+    dispatch(
+      updateDownloadStatus(
+        instanceName,
+        loader.status === 'checking'
+          ? 'Checking game files'
+          : 'Downloading game files...'
+      )
+    );
 
     const mcVersion = loader?.mcVersion;
 
@@ -1357,8 +1373,7 @@ export function downloadInstance(instanceName) {
       state.settings.concurrentDownloads
     );
     if (suceeded) {
-    }
-    else {
+    } else {
       // todo: notify user
     }
 
@@ -1391,7 +1406,12 @@ export function downloadInstance(instanceName) {
       await dispatch(downloadFabric(instanceName));
     }
 
-    await dispatch(downloadExtraDependencies(instanceName));
+    await dispatch(
+      downloadExtraDependencies(
+        instanceName,
+        loader.status === 'checking' ? 'Checking game dependencies...' : ''
+      )
+    );
     dispatch(updateDownloadProgress(-1));
 
     // Be aware that from this line the installer lock might be unlocked!
