@@ -23,6 +23,7 @@ import pMap from 'p-map';
 import makeDir from 'make-dir';
 import { major, minor, patch, prerelease } from 'semver';
 import { generate as generateRandomString } from 'randomstring';
+import { message } from 'antd';
 import * as ActionTypes from './actionTypes';
 import {
   MC_RESOURCES_URL,
@@ -114,6 +115,8 @@ import { UPDATE_CONCURRENT_DOWNLOADS } from './settings/actionTypes';
 import { UPDATE_MODAL } from './modals/actionTypes';
 import PromiseQueue from '../../app/desktop/utils/PromiseQueue';
 import { openModal } from './modals/actions';
+
+const messageAntd = message;
 
 export function initManifests() {
   return async (dispatch, getState) => {
@@ -1190,17 +1193,21 @@ export function downloadExtraDependencies(
       }
     };
 
-    const suceeded = await downloadInstanceFiles(
+    const succeeded = await downloadInstanceFiles(
       dependencies,
       updatePercentage,
       state.settings.concurrentDownloads,
       1
     );
-    if (suceeded) {
+    if (succeeded) {
       await fse.outputJson(extraDependenciesPath, extraDependencies);
     } else {
-      // todo: notify user
+      messageAntd.error('Download failed, Please retry after a while');
+      dispatch(updateDownloadStatus(instanceName, 'Download failed'));
+      dispatch(updateDownloadProgress(-1));
     }
+
+    return succeeded;
   };
 }
 
@@ -1212,7 +1219,7 @@ export function downloadFabric(instanceName) {
     dispatch(
       updateDownloadStatus(
         instanceName,
-        loader.status === 'checking'
+        loader.downloadStatus === 'checking'
           ? 'Checking fabric files...'
           : 'Downloading fabric files...'
       )
@@ -1230,7 +1237,7 @@ export function downloadFabric(instanceName) {
     try {
       fabricJson = await fse.readJson(fabricJsonPath);
       // fabric is no hash check
-      return;
+      return true;
     } catch (err) {
       fabricJson = (await getFabricJson(loader)).data;
     }
@@ -1250,16 +1257,20 @@ export function downloadFabric(instanceName) {
       }
     };
 
-    const suceeded = await downloadInstanceFiles(
+    const succeeded = await downloadInstanceFiles(
       libraries,
       updatePercentage,
       state.settings.concurrentDownloads
     );
-    if (suceeded) {
+    if (succeeded) {
       await fse.outputJson(fabricJsonPath, fabricJson);
     } else {
-      // todo: notify user
+      messageAntd.error('Download failed, Please retry after a while');
+      dispatch(updateDownloadStatus(instanceName, 'Download failed'));
+      dispatch(updateDownloadProgress(-1));
     }
+
+    return succeeded;
   };
 }
 
@@ -1277,7 +1288,7 @@ export function downloadInstance(instanceName) {
     dispatch(
       updateDownloadStatus(
         instanceName,
-        loader.status === 'checking'
+        loader.downloadStatus === 'checking'
           ? 'Checking game files'
           : 'Downloading game files...'
       )
@@ -1367,14 +1378,16 @@ export function downloadInstance(instanceName) {
       }
     };
 
-    const suceeded = await downloadInstanceFiles(
+    const succeeded = await downloadInstanceFiles(
       [...libraries, ...assets, mcMainFile],
       updatePercentage,
       state.settings.concurrentDownloads
     );
-    if (suceeded) {
-    } else {
-      // todo: notify user
+    if (!succeeded) {
+      messageAntd.error('Download failed, Please retry after a while');
+      dispatch(updateDownloadStatus(instanceName, 'Download failed'));
+      dispatch(updateDownloadProgress(-1));
+      return;
     }
 
     dispatch(updateDownloadStatus(instanceName, 'Extracting game files...'));
@@ -1403,21 +1416,29 @@ export function downloadInstance(instanceName) {
       await copyAssetsToLegacy(assets);
     }
     if (loader?.loaderType === FABRIC) {
-      await dispatch(downloadFabric(instanceName));
+      const result = await dispatch(downloadFabric(instanceName));
+      if (!result) {
+        return;
+      }
     }
 
-    await dispatch(
+    const result = await dispatch(
       downloadExtraDependencies(
         instanceName,
-        loader.status === 'checking' ? 'Checking game dependencies...' : ''
+        loader.downloadStatus === 'checking'
+          ? 'Checking game dependencies...'
+          : 'Downloading extra dependencies...'
       )
     );
+
     dispatch(updateDownloadProgress(-1));
 
     // Be aware that from this line the installer lock might be unlocked!
 
-    await dispatch(removeDownloadFromQueue(instanceName));
-    dispatch(addNextInstanceToCurrentDownload());
+    if (result) {
+      await dispatch(removeDownloadFromQueue(instanceName));
+      dispatch(addNextInstanceToCurrentDownload());
+    }
   };
 }
 

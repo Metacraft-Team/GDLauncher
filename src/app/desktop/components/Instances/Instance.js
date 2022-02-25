@@ -168,6 +168,8 @@ const Instance = ({ instanceName }) => {
 
   const isPlaying = startedInstances[instanceName];
 
+  const [isChecking, setIsChecking] = useState(true);
+
   useEffect(() => {
     if (instance.background) {
       fs.readFile(path.join(instancesPath, instanceName, instance.background))
@@ -179,6 +181,12 @@ const Instance = ({ instanceName }) => {
       setBackground(`${instanceDefaultBackground}`);
     }
   }, [instance.background, instancesPath, instanceName]);
+
+  useEffect(() => {
+    if (isPlaying || isInQueue) {
+      setIsChecking(false);
+    }
+  }, [isPlaying, isInQueue]);
 
   const startInstance = () => {
     if (isInQueue || isPlaying) return;
@@ -236,7 +244,7 @@ const Instance = ({ instanceName }) => {
           </InstanceContainer>
           <HoverContainer
             installing={isInQueue}
-            isHovered={isHovered || isPlaying}
+            isHovered={isHovered || isPlaying || isChecking}
           >
             {currentDownload === instanceName ? (
               <>
@@ -247,14 +255,22 @@ const Instance = ({ instanceName }) => {
                 >
                   {isInQueue ? isInQueue.status : null}
                 </div>
-                {`${isInQueue.percentage}%`}
-                <LoadingOutlined
-                  css={`
-                    position: absolute;
-                    bottom: 8px;
-                    right: 8px;
-                  `}
-                />
+                {`${
+                  Number(isInQueue.percentage) === -1
+                    ? ''
+                    : `${isInQueue.percentage}%`
+                }`}
+                {Number(isInQueue.percentage) === -1 ? (
+                  <></>
+                ) : (
+                  <LoadingOutlined
+                    css={`
+                      position: absolute;
+                      bottom: 8px;
+                      right: 8px;
+                    `}
+                  />
+                )}
               </>
             ) : (
               <>
@@ -283,8 +299,9 @@ const Instance = ({ instanceName }) => {
                     {!isPlaying.initialized && <div className="spinner" />}
                   </div>
                 )}
-                {isInQueue && 'In Queue'}
-                {!isInQueue && !isPlaying && 'PLAY'}
+                {!isChecking && isInQueue ? isInQueue.status || 'In Queue' : ''}
+                {!isChecking && !isInQueue && !isPlaying && 'PLAY'}
+                {isChecking ? 'Prepare for checking' : ''}
               </>
             )}
           </HoverContainer>

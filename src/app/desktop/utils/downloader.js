@@ -17,88 +17,93 @@ export const downloadInstanceFiles = async (
   updatePercentageThreshold = 5
 ) => {
   let downloaded = 0;
-  const result = await pMap(
-    arr,
-    async item => {
-      let counter = 0;
-      let res = false;
+  try {
+    const result = await pMap(
+      arr,
+      async item => {
+        let counter = 0;
+        let res = false;
 
-      // remove file
-      if (!item.url && item.path) {
-        try {
-          await fs.rm(item.path);
-        } catch (e) {
-          console.log(`remove ${item.path} error: `, e);
+        // remove file
+        if (!item.url && item.path) {
+          try {
+            await fs.rm(item.path);
+          } catch (e) {
+            console.log(`remove ${item.path} error: `, e);
+          }
+          return item;
         }
-        return item;
-      }
 
-      // skip file
-      if (!item.path || !item.url || item.needUpgrade === false) {
-        console.info('Skipping', item.url, item.needUpgrade);
-        return item;
-      }
+        // skip file
+        if (!item.path || !item.url || item.needUpgrade === false) {
+          console.info('Skipping', item.url, item.needUpgrade);
+          return item;
+        }
 
-      // download file
-      do {
-        counter += 1;
-        let { url } = item;
-        if (counter !== 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          if (
-            counter % 2 === 0 &&
-            url.startsWith('https://resources.download.minecraft.net')
-          ) {
-            url = url.replaceAll(
-              'https://resources.download.minecraft.net',
-              'https://mc-lib-mirr.oss-accelerate.aliyuncs.com'
+        // download file
+        do {
+          counter += 1;
+          let { url } = item;
+          if (counter !== 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (
+              counter % 2 === 0 &&
+              url.startsWith('https://resources.download.minecraft.net')
+            ) {
+              url = url.replaceAll(
+                'https://resources.download.minecraft.net',
+                'https://mc-lib-mirr.oss-accelerate.aliyuncs.com'
+              );
+            }
+          }
+          try {
+            console.log('downloading: ', url, 'counter: ', counter);
+
+            res = await downloadFileInstance(
+              item.path,
+              url,
+              item.sha1,
+              item.legacyPath
             );
+
+            if (res) {
+              console.log('downloaded success: ', downloaded + 1, url);
+            } else if (counter >= 100) {
+              console.error('downloaded fail: ', url);
+            }
+          } catch (e) {
+            console.log(e);
           }
+        } while (!res && counter < 100);
+
+        // update percentage
+        if (counter >= 100) {
+          throw new Error('download failed after retry 100 times');
         }
-        try {
-          console.log('downloading: ', url, 'counter: ', counter);
 
-          res = await downloadFileInstance(
-            item.path,
-            url,
-            item.sha1,
-            item.legacyPath
-          );
+        downloaded += 1;
+        if (
+          (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
+          downloaded === arr.length
+        )
+          updatePercentage(downloaded);
+        return item;
+      },
+      { concurrency: threads, stopOnError: true }
+    );
 
-          if (res) {
-            console.log('downloaded success: ', downloaded + 1, url);
-          } else if (counter >= 100) {
-            console.error('downloaded fail: ', url);
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      } while (!res && counter < 100);
-
-      // update percentage
-      if (counter >= 100) {
-        return pMapSkip;
-      }
-
-      downloaded += 1;
-      if (
-        (updatePercentage && downloaded % updatePercentageThreshold === 0) ||
-        downloaded === arr.length
-      )
-        updatePercentage(downloaded);
-      return item;
-    },
-    { concurrency: threads }
-  );
-  console.log(
-    'downloadInstanceFiles: ',
-    'exact download count ',
-    result.length,
-    'expect download count',
-    arr.length
-  );
-  if (result.length < arr.length) return false;
-  return true;
+    console.log(
+      'downloadInstanceFiles: ',
+      'exact download count ',
+      result.length,
+      'expect download count',
+      arr.length
+    );
+    if (result.length < arr.length) return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
 };
 
 const downloadFileInstance = async (fileName, url, sha1, legacyPath) => {
