@@ -4,9 +4,9 @@ import { Spin, message } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
+import { ipcRenderer } from 'electron';
 import Modal from '../components/Modal';
-
 import { _getAccounts, _getCurrentAccount } from '../utils/selectors';
 import { openModal, closeModal } from '../reducers/modals/actions';
 import {
@@ -16,7 +16,7 @@ import {
   removeAccount,
   loginWithOAuthAccessToken
 } from '../reducers/actions';
-import { load } from '../reducers/loading/actions';
+import { load, loginViaETH } from '../reducers/loading/actions';
 import features from '../reducers/loading/features';
 import { ACCOUNT_MICROSOFT } from '../utils/constants';
 
@@ -96,13 +96,17 @@ const ProfileSettings = () => {
                   </div>
                   {!account.accessToken && (
                     <HoverContainer
-                      onClick={() =>
-                        dispatch(
-                          openModal('AddAccount', {
-                            username: account.user.username
-                          })
-                        )
-                      }
+                      onClick={async () => {
+                        dispatch(closeModal());
+
+                        await dispatch(push('/'));
+
+                        ipcRenderer.invoke(
+                          'loginWithMetamask',
+                          account.address
+                        );
+                        dispatch(loginViaETH(true));
+                      }}
                     >
                       Login again
                     </HoverContainer>
