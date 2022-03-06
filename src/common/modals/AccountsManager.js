@@ -51,7 +51,7 @@ const ProfileSettings = () => {
                     account.selectedProfile.id ===
                     currentAccount.selectedProfile.id
                   }
-                  onClick={() => {
+                  onClick={async () => {
                     if (
                       isLoading.isRequesting ||
                       account.selectedProfile.id ===
@@ -65,7 +65,7 @@ const ProfileSettings = () => {
                       updateCurrentAccountId(account.selectedProfile.id)
                     );
 
-                    dispatch(
+                    await dispatch(
                       metaCraftValidate({
                         accessToken: account.accessToken
                       })
@@ -80,6 +80,8 @@ const ProfileSettings = () => {
                       message.error('Account not valid');
                       console.error(e);
                     });
+
+                    dispatch(closeModal());
                   }}
                 >
                   <div>
