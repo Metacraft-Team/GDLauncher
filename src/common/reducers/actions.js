@@ -194,11 +194,11 @@ export function switchToFirstValidAccount(id) {
       }
       try {
         dispatch(updateCurrentAccountId(accounts[i].selectedProfile.id));
-        await dispatch(
-          accounts[i].accountType === ACCOUNT_MICROSOFT
-            ? loginWithOAuthAccessToken()
-            : loginWithAccessToken()
-        );
+        // await dispatch(
+        //   accounts[i].accountType === ACCOUNT_MICROSOFT
+        //     ? loginWithOAuthAccessToken()
+        //     : loginWithAccessToken()
+        // );
         found = accounts[i].selectedProfile.id;
       } catch {
         dispatch(
@@ -219,16 +219,17 @@ export function switchToFirstValidAccount(id) {
 
 export function removeAccount(id) {
   return async (dispatch, getState) => {
+    await dispatch({
+      type: ActionTypes.REMOVE_ACCOUNT,
+      id
+    });
+
     const state = getState();
     const { currentAccountId } = state.app;
     let newId = id;
     if (currentAccountId === id) {
       newId = await dispatch(switchToFirstValidAccount(id));
     }
-    dispatch({
-      type: ActionTypes.REMOVE_ACCOUNT,
-      id
-    });
     return newId;
   };
 }
