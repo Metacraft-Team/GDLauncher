@@ -54,31 +54,35 @@ app.setAsDefaultProtocolClient(PROTOCOL);
 const sendLoginParams = urlStr => {
   log.log('mac 准备执行网页端调起客户端逻辑');
   log.log('urlStr: ', urlStr);
-  const urlObj = new URL(urlStr);
-  const { searchParams } = urlObj;
-  const signature = searchParams.get('signature');
-  const address = searchParams.get('address');
-  const checksumAddress = searchParams.get('checksumAddress');
-  const timestamp = searchParams.get('timestamp');
-  const name = searchParams.get('name');
+  try {
+    const urlObj = new URL(urlStr);
+    const { searchParams } = urlObj;
+    const signature = searchParams.get('signature');
+    const address = searchParams.get('address');
+    const checksumAddress = searchParams.get('checksumAddress');
+    const timestamp = searchParams.get('timestamp');
+    const name = searchParams.get('name');
 
-  if (mainWindow) {
-    if (process.platform === 'win32' && mainWindow.isMinimized()) {
-      mainWindow.restore();
+    if (mainWindow) {
+      if (process.platform === 'win32' && mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+
+      mainWindow.focus();
+      mainWindow.show();
+
+      log.log('mainWindow webContents send');
+
+      mainWindow.webContents.send('receive-metamask-login-params', {
+        name,
+        address,
+        checksumAddress,
+        signature,
+        timestamp
+      });
     }
-
-    mainWindow.focus();
-    mainWindow.show();
-
-    log.log('mainWindow webContents send');
-
-    mainWindow.webContents.send('receive-metamask-login-params', {
-      name,
-      address,
-      checksumAddress,
-      signature,
-      timestamp
-    });
+  } catch (e) {
+    console.error(e);
   }
 };
 
