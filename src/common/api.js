@@ -188,6 +188,16 @@ export const metaCraftLogout = ({
   );
 };
 
+export const metaCraftValidateRequest = ({ accessToken }) => {
+  return axios.post(
+    `${METACRAFT_SERVICES_URL}/authserver/validate`,
+    {
+      access_token: accessToken
+    },
+    { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+  );
+};
+
 // Minecraft API
 
 export const mcAuthenticate = (username, password, clientToken) => {

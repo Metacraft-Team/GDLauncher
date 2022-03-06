@@ -61,7 +61,8 @@ import {
   msMinecraftProfile,
   msOAuthRefresh,
   metaCraftAuthenticateRequest,
-  metaCraftLogout
+  metaCraftLogout,
+  metaCraftValidateRequest
 } from '../api';
 import {
   _getAccounts,
@@ -810,6 +811,32 @@ export function logoutMetamask(params) {
     metaCraftLogout(params).catch(console.error);
     dispatch(removeAccount(id));
     dispatch(push('/'));
+  };
+}
+
+export function metaCraftValidate(params) {
+  return async (dispatch, getState) => {
+    try {
+      await metaCraftValidateRequest(params).then(result => {
+        const {
+          data: { error, errorMessage }
+        } = result;
+        console.log(result);
+
+        if (result.status === 204) {
+          return Promise.resolve(true);
+        }
+        if (error) {
+          return Promise.reject(
+            new Error(`error: ${error}, errorMessage: ${errorMessage}`)
+          );
+        }
+        return Promise.reject(new Error(`Account validate failed`));
+      });
+    } catch (error) {
+      console.error(error);
+      throw new Error(error);
+    }
   };
 }
 
@@ -1629,67 +1656,64 @@ export const startListener = () => {
     const changesTracker = {};
 
     const processAddedFile = async (fileName, instanceName) => {
-      const processChange = async () => {
-        const newState = getState();
-        const instance = _getInstance(newState)(instanceName);
-        const isInConfig = (instance?.mods || []).find(
-          mod => mod.fileName === path.basename(fileName)
-        );
-        try {
-          const stat = await fs.lstat(fileName);
-
-          if (instance?.mods && !isInConfig && stat.isFile() && instance) {
-            // get murmur hash
-            const murmurHash = await getFileMurmurHash2(fileName);
-            const { data } = await getAddonsByFingerprint([murmurHash]);
-            const exactMatch = (data.exactMatches || [])[0];
-            const notMatch = (data.unmatchedFingerprints || [])[0];
-            let mod = {};
-
-            if (exactMatch) {
-              let addon = null;
-              try {
-                addon = (await getAddon(exactMatch.file.projectId)).data;
-                mod = normalizeModData(
-                  exactMatch.file,
-                  exactMatch.file.projectId,
-                  addon.name
-                );
-                mod.fileName = path.basename(fileName);
-              } catch {
-                mod = {
-                  fileName: path.basename(fileName),
-                  displayName: path.basename(fileName),
-                  packageFingerprint: murmurHash
-                };
-              }
-            } else if (notMatch) {
-              mod = {
-                fileName: path.basename(fileName),
-                displayName: path.basename(fileName),
-                packageFingerprint: murmurHash
-              };
-            }
-
-            const updatedInstance = _getInstance(getState())(instanceName);
-            const isStillNotInConfig = !(updatedInstance?.mods || []).find(
-              m => m.fileName === path.basename(fileName)
-            );
-            if (isStillNotInConfig && updatedInstance) {
-              console.log('[RTS] ADDING MOD', fileName, instanceName);
-              await dispatch(
-                updateInstanceConfig(instanceName, prev => ({
-                  ...prev,
-                  mods: [...(prev.mods || []), mod]
-                }))
-              );
-            }
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      };
-      Queue.add(processChange);
+      // const processChange = async () => {
+      //   const newState = getState();
+      //   const instance = _getInstance(newState)(instanceName);
+      //   const isInConfig = (instance?.mods || []).find(
+      //     mod => mod.fileName === path.basename(fileName)
+      //   );
+      //   try {
+      //     const stat = await fs.lstat(fileName);
+      //     if (instance?.mods && !isInConfig && stat.isFile() && instance) {
+      //       // get murmur hash
+      //       const murmurHash = await getFileMurmurHash2(fileName);
+      //       const { data } = await getAddonsByFingerprint([murmurHash]);
+      //       const exactMatch = (data.exactMatches || [])[0];
+      //       const notMatch = (data.unmatchedFingerprints || [])[0];
+      //       let mod = {};
+      //       if (exactMatch) {
+      //         let addon = null;
+      //         try {
+      //           addon = (await getAddon(exactMatch.file.projectId)).data;
+      //           mod = normalizeModData(
+      //             exactMatch.file,
+      //             exactMatch.file.projectId,
+      //             addon.name
+      //           );
+      //           mod.fileName = path.basename(fileName);
+      //         } catch {
+      //           mod = {
+      //             fileName: path.basename(fileName),
+      //             displayName: path.basename(fileName),
+      //             packageFingerprint: murmurHash
+      //           };
+      //         }
+      //       } else if (notMatch) {
+      //         mod = {
+      //           fileName: path.basename(fileName),
+      //           displayName: path.basename(fileName),
+      //           packageFingerprint: murmurHash
+      //         };
+      //       }
+      //       const updatedInstance = _getInstance(getState())(instanceName);
+      //       const isStillNotInConfig = !(updatedInstance?.mods || []).find(
+      //         m => m.fileName === path.basename(fileName)
+      //       );
+      //       if (isStillNotInConfig && updatedInstance) {
+      //         console.log('[RTS] ADDING MOD', fileName, instanceName);
+      //         await dispatch(
+      //           updateInstanceConfig(instanceName, prev => ({
+      //             ...prev,
+      //             mods: [...(prev.mods || []), mod]
+      //           }))
+      //         );
+      //       }
+      //     }
+      //   } catch (err) {
+      //     console.error(err);
+      //   }
+      // };
+      // Queue.add(processChange);
     };
 
     const processRemovedFile = async (fileName, instanceName) => {

@@ -14,7 +14,8 @@ import {
   loginWithAccessToken,
   updateAccount,
   removeAccount,
-  loginWithOAuthAccessToken
+  loginWithOAuthAccessToken,
+  metaCraftValidate
 } from '../reducers/actions';
 import { load, loginViaETH } from '../reducers/loading/actions';
 import features from '../reducers/loading/features';
@@ -63,16 +64,12 @@ const ProfileSettings = () => {
                     dispatch(
                       updateCurrentAccountId(account.selectedProfile.id)
                     );
+
                     dispatch(
-                      load(
-                        features.mcAuthentication,
-                        dispatch(
-                          account.accountType === ACCOUNT_MICROSOFT
-                            ? loginWithOAuthAccessToken(false)
-                            : loginWithAccessToken(false)
-                        )
-                      )
-                    ).catch(() => {
+                      metaCraftValidate({
+                        accessToken: account.accessToken
+                      })
+                    ).catch(e => {
                       dispatch(updateCurrentAccountId(currentId));
                       dispatch(
                         updateAccount(account.selectedProfile.id, {
@@ -81,6 +78,7 @@ const ProfileSettings = () => {
                         })
                       );
                       message.error('Account not valid');
+                      console.error(e);
                     });
                   }}
                 >

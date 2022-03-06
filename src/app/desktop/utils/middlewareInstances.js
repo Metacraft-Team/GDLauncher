@@ -28,11 +28,11 @@ const middleware = store => next => action => {
         type: ActionTypes.UPDATE_INSTANCES,
         instances
       });
-      const instances1 = await modsFingerprintsScan(instancesPath);
-      dispatch({
-        type: ActionTypes.UPDATE_INSTANCES,
-        instances: instances1
-      });
+      // const instances1 = await modsFingerprintsScan(instancesPath);
+      // dispatch({
+      //   type: ActionTypes.UPDATE_INSTANCES,
+      //   instances: instances1
+      // });
       try {
         await makeDir(instancesPath);
         await dispatch(startListener());
