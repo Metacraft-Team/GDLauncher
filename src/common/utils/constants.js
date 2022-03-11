@@ -5,9 +5,9 @@ export const FABRIC_APIS = 'https://meta.fabricmc.net/v2';
 export const GDL_LEGACYJAVAFIXER_MOD_URL =
   'https://gdevs.io/legacyjavafixer-1.0.jar';
 export const MOJANG_APIS = 'https://authserver.mojang.com';
-export const JAVA_MANIFEST_URL = 'https://api.test.metacraft.cc/configs/openjdk17.json';
+export const JAVA_MANIFEST_URL = 'https://api.metacraft.cc/configs/openjdk17.json';
 export const JAVA17_MANIFEST_URL =
-  'https://api.test.metacraft.cc/configs/openjdk17.json';
+  'https://api.metacraft.cc/configs/openjdk17.json';
 export const MAVEN_REPO = 'http://central.maven.org/maven2';
 export const MC_LIBRARIES_URL = 'https://libraries.minecraft.net';
 export const FORGESVC_URL = 'https://addons-ecs.forgesvc.net/api/v2';
@@ -24,7 +24,7 @@ export const FABRIC = 'fabric';
 export const FORGE = 'forge';
 export const VANILLA = 'vanilla';
 
-export const FABRIC_LOADER_VERSION = '0.13.2';
+export const FABRIC_LOADER_VERSION = '0.13.3';
 export const MC_VERSION = '1.18.1';
 
 export const CURSEFORGE = 'curseforge';
@@ -41,7 +41,7 @@ export const MICROSOFT_OAUTH_REDIRECT_URL =
   'https://login.microsoftonline.com/common/oauth2/nativeclient';
 export const MINECRAFT_SERVICES_URL = 'https://api.minecraftservices.com';
 
-export const METACRAFT_SERVICES_URL = 'https://api.test.metacraft.cc';
+export const METACRAFT_SERVICES_URL = 'https://api.metacraft.cc';
 
 export const MC_STARTUP_METHODS = {
   SYMLINK: 'Symlink',

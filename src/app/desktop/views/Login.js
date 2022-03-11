@@ -107,6 +107,7 @@ const AccountInfoLabel = styled.div`
 const AccountInfoContent = styled.div`
   width: 100%;
   height: 48px;
+  padding-left: 12px;
   background: #293649;
   border-radius: 15px;
   font-weight: 500;
@@ -393,7 +394,7 @@ const Login = () => {
               <SocialMediaContainer>
                 <a
                   className="a1"
-                  href="https://docs.metacraft.cc/white-paper/introduction/what-is-metacraft"
+                  href="https://docs.metacraft.cc"
                   css={`
                     -webkit-app-region: no-drag;
                     cursor: pointer;
@@ -406,7 +407,7 @@ const Login = () => {
                 </a>
                 <a
                   className="a2"
-                  href="https://twitter.com/MetaCraftCC"
+                  href="https://twitter.com/MetacraftCC"
                   css={`
                     -webkit-app-region: no-drag;
                     cursor: pointer;

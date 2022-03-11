@@ -275,7 +275,7 @@ export const getMcManifest = () => {
 };
 
 export const getMcExtraDependency = () => {
-  const url = `https://api.test.metacraft.cc/configs/dependency.json?timestamp=${new Date().getTime()}`;
+  const url = `https://api.metacraft.cc/configs/dependency.json?timestamp=${new Date().getTime()}`;
   return axios.get(url);
 };
 
