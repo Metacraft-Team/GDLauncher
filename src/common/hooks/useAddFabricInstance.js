@@ -57,6 +57,8 @@ const useAddFabricInstance = ({
     });
   };
 
+
+
   const isInstanceAlreadyExists = async () => {
     if (mcName) {
       const regex = /^[\sa-zA-Z0-9_.-]+$/;
@@ -221,10 +223,10 @@ const useAddFabricInstance = ({
           data.targets[0].name === FABRIC
             ? forgeModloader?.version
             : convertcurseForgeToCanonical(
-                forgeModloader?.version,
-                mcVersion,
-                forgeManifest
-              ),
+              forgeModloader?.version,
+              mcVersion,
+              forgeManifest
+            ),
         fileID: version?.fileID,
         projectID: version?.projectID,
         source: FTB,

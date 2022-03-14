@@ -93,15 +93,15 @@ const Home = () => {
   useEffect(() => {
     const init = async () => {
       const appVersion = await ipcRenderer.invoke('getAppVersion');
+      console.log('appVersion', lastUpdateVersion, appVersion);
       if (lastUpdateVersion !== appVersion) {
         dispatch(updateLastUpdateVersion(appVersion));
-        dispatch(openModal('ChangeLogs'));
-      } else if (!java17Path) {
-        await checkAndInstallJava();
-        createInstance();
-      } else {
-        createInstance();
+        // dispatch(openModal('ChangeLogs'));
       }
+      if (!java17Path) {
+        await checkAndInstallJava();
+      }
+      createInstance();
     };
 
     init();
