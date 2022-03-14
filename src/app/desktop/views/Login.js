@@ -117,7 +117,7 @@ const AccountInfoContent = styled.div`
   color: #f8f8f8;
 `;
 
-const HelpLink = styled.div`
+const HelpLink = styled.a`
   margin-top: 32px;
   display  block;
   text-align: center;
@@ -379,7 +379,7 @@ const Login = () => {
                 )}
               </ButtonGroup>
               {isConfirmAccount ? null : (
-                <HelpLink>
+                <HelpLink href='https://docs.metacraft.cc/guides/how-to-install-and-use-metamask'>
                   How to install and use Metamask?
                   <FontAwesomeIcon
                     css={`
@@ -402,7 +402,7 @@ const Login = () => {
                 >
                   <SocialMediaIcon>
                     <img src={whitepaperIcon} alt="whitepaper" />
-                    <p>WhitePaper</p>
+                    <p>Docs</p>
                   </SocialMediaIcon>
                 </a>
                 <a

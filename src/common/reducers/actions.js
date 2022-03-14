@@ -1190,10 +1190,7 @@ export function downloadExtraDependencies(
           prevExtraDependencies[filePath] &&
           prevExtraDependencies[filePath][key]
         ) {
-          needUpgrade = lt(
-            prevExtraDependencies[filePath][key].version,
-            item[key].version
-          );
+          needUpgrade = prevExtraDependencies[filePath][key].version < item[key].version
         }
 
         return {
