@@ -346,7 +346,7 @@ function createWindow() {
         ...requestHeaders
       } = details.requestHeaders;
       if (xSkipOrigin !== 'skip') {
-        requestHeaders.Origin = 'https://gdevs.io';
+        requestHeaders.Origin = 'https://metacraft.cc';
       }
       callback({ cancel: false, requestHeaders });
     }

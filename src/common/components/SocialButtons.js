@@ -36,12 +36,12 @@ const SocialButtons = () => {
         }
       `}
     >
-      <a href="discord.gg/PvzFHa4QJd">
+      <a href="https://discord.gg/PvzFHa4QJd">
         <div>
           <FontAwesomeIcon icon={faDiscord} size="lg" />
         </div>
       </a>
-      <a href="https://github.com/Metacraft-Team/Launcher">
+      <a href="https://github.com/Metacraft-Team">
         <div>
           <FontAwesomeIcon icon={faGithub} size="lg" />
         </div>
@@ -51,7 +51,7 @@ const SocialButtons = () => {
           <FontAwesomeIcon icon={faTwitter} size="lg" />
         </div>
       </a>
-      <a href="https://gdevs.io">
+      <a href="https://metacraft.cc">
         <div>
           <FontAwesomeIcon icon={faGlobe} size="lg" />
         </div>
