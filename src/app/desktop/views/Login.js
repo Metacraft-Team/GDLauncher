@@ -6,7 +6,7 @@ import { Transition } from 'react-transition-group';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faExternalLinkAlt,
-  faInfoCircle
+  faQuestionCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { Button, Space } from 'antd';
 import { useKey } from 'rooks';
@@ -385,23 +385,36 @@ const Login = () => {
                     css={`
                       margin-left: 6px;
                     `}
-                    icon={faInfoCircle}
+                    icon={faQuestionCircle}
                   />
                 </HelpLink>
               )}
+              <HelpLink href='https://docs.metacraft.cc/guides/beginners-guide'
+                css={`
+                  margin-top: 6px;
+                `}
+              >
+                How to play?
+                <FontAwesomeIcon
+                  css={`
+                      margin-left: 6px;
+                    `}
+                  icon={faQuestionCircle}
+                />
+              </HelpLink>
             </Content>
             <Footer>
               <SocialMediaContainer>
                 <a
                   className="a1"
-                  href="https://docs.metacraft.cc"
+                  href="https://docs.metacraft.cc/guides"
                   css={`
                     -webkit-app-region: no-drag;
                     cursor: pointer;
                   `}
                 >
                   <SocialMediaIcon>
-                    <img src={whitepaperIcon} alt="whitepaper" />
+                    <img src={whitepaperIcon} alt="Guides" />
                     <p>Docs</p>
                   </SocialMediaIcon>
                 </a>
