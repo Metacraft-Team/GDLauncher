@@ -170,8 +170,10 @@ const commonConfig = {
       include: './public/installer.nsh'
     },
     mac: {
+      "hardenedRuntime": true,
       entitlements: './entitlements.mac.plist',
-      entitlementsInherit: './entitlements.mac.plist'
+      entitlementsInherit: './entitlements.mac.plist',
+      "target": ["dmg", "zip"]
     },
     /* eslint-disable */
     artifactName: `${'${productName}'}-${'${os}'}-${process.argv[2]
@@ -241,7 +243,7 @@ const main = async () => {
       ]
     },
     portable: {
-      darwin: [],
+      darwin: [`${productName}-mac-${type}.zip`],
       win32: [`${productName}-win-${type}.zip`],
       linux: [`${productName}-linux-${type}.snap`]
     }
