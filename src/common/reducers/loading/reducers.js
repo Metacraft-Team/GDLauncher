@@ -12,7 +12,8 @@ const defaultState = FEATURES.reduce(
       isReceived: false,
       error: null,
       updated: null,
-      isLoginViaEth: false
+      isLoginViaEth: false,
+      isGlobalLodingChecking: false
     }
   }),
   {}
@@ -68,6 +69,11 @@ function loading(state = defaultState, action) {
       return {
         ...state,
         isLoginViaEth: action.data
+      };
+    case ActionTypes.GLOBAL_LOGIN_CHECKING:
+      return {
+        ...state,
+        isGlobalLodingChecking: action.data
       };
     default:
       return state;

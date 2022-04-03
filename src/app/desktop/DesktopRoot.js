@@ -10,32 +10,25 @@ import RouteWithSubRoutes from '../../common/components/RouteWithSubRoutes';
 import {
   loginWithAccessToken,
   initManifests,
-  loginThroughNativeLauncher,
   switchToFirstValidAccount,
   checkClientToken,
   updateUserData,
-  loginWithOAuthAccessToken,
   updateServerMetaData
 } from '../../common/reducers/actions';
 import {
-  load,
-  received,
-  requesting
+  globalLoginChecking,
+  load
 } from '../../common/reducers/loading/actions';
 import features from '../../common/reducers/loading/features';
 import GlobalStyles from '../../common/GlobalStyles';
 import RouteBackground from '../../common/components/RouteBackground';
-import ga from '../../common/utils/analytics';
 import routes from './utils/routes';
 import { _getCurrentAccount } from '../../common/utils/selectors';
-import { isLatestJavaDownloaded, isLocalJava17Exist } from './utils';
+import { isLatestJavaDownloaded } from './utils';
 import SystemNavbar from './components/SystemNavbar';
-import useTrackIdle from './utils/useTrackIdle';
 import { openModal } from '../../common/reducers/modals/actions';
 import Message from './components/Message';
-import { ACCOUNT_MICROSOFT } from '../../common/utils/constants';
 import { metaCraftServerCheck } from '../../common/api';
-import { useAutomaticSetupJava } from '../../common/hooks';
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -57,9 +50,7 @@ const Container = styled.div`
 function DesktopRoot({ store }) {
   const dispatch = useDispatch();
   const currentAccount = useSelector(_getCurrentAccount);
-  const clientToken = useSelector(state => state.app.clientToken);
   const java17Path = useSelector(state => state.settings.java.path17);
-  const location = useSelector(state => state.router.location);
   const shouldShowDiscordRPC = useSelector(state => state.settings.discordRPC);
 
   message.config({
@@ -81,6 +72,10 @@ function DesktopRoot({ store }) {
   };
 
   const init = async () => {
+    // set global login checking status
+    dispatch(globalLoginChecking(true));
+    console.log(currentAccount);
+
     const userDataStatic = await ipcRenderer.invoke('getUserData');
     const userData = dispatch(updateUserData(userDataStatic));
     await dispatch(checkClientToken());
@@ -137,6 +132,9 @@ function DesktopRoot({ store }) {
         }
       });
     }
+
+    // stop global login checking
+    dispatch(globalLoginChecking(false));
 
     if (shouldShowDiscordRPC) {
       ipcRenderer.invoke('init-discord-rpc');

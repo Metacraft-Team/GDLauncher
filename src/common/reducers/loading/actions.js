@@ -27,6 +27,14 @@ export function loginViaETH(status) {
     data: status
   };
 }
+
+export function globalLoginChecking(status) {
+  return {
+    type: ActionTypes.GLOBAL_LOGIN_CHECKING,
+    data: status
+  };
+}
+
 export function catchError(feature, errorValue) {
   const isErrorObject = typeof errorValue === 'object' && errorValue !== null;
   const error = isErrorObject ? errorValue.message || errorValue : errorValue;

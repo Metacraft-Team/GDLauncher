@@ -22,6 +22,7 @@ import metaCraftLogo from '../../../common/assets/metaCraft-logo.svg';
 import logoWithoutText from '../../../common/assets/logo.png';
 import leftSideBg from '../../../common/assets/left-side-bg.svg';
 import formatAddress from '../../../common/utils/formatAddress';
+import { _getCurrentAccount } from '../../../common/utils/selectors';
 
 const SocialMediaContainer = styled.div`
   margin-top: 48px;
@@ -151,9 +152,9 @@ const LeftSide = styled.div`
   transition: 0.3s ease-in-out;
   transform: translateX(
     ${({ transitionState }) =>
-    transitionState === 'entering' || transitionState === 'entered'
-      ? -300
-      : 0}px
+      transitionState === 'entering' || transitionState === 'entered'
+        ? -300
+        : 0}px
   );
   background: url('${leftSideBg}') 0 0 100% 100% no-repeat;
 
@@ -179,9 +180,9 @@ const Background = styled.div`
     transition: 0.3s ease-in-out;
     transform: translateX(
       ${({ transitionState }) =>
-    transitionState === 'entering' || transitionState === 'entered'
-      ? -300
-      : 0}px
+        transitionState === 'entering' || transitionState === 'entered'
+          ? -300
+          : 0}px
     );
     position: absolute;
     width: 100%;
@@ -234,6 +235,7 @@ const Loading = styled.div`
 `;
 
 const Login = () => {
+  const currentUser = useSelector(_getCurrentAccount);
   const dispatch = useDispatch();
   // switch for showing confirm account view
   const [isConfirmAccount, setConfirmAccount] = useState(false);
@@ -243,7 +245,12 @@ const Login = () => {
 
   const [setLoginFailed] = useState(false);
 
+  const isGlobalLodingChecking = useSelector(
+    state => state.loading.isGlobalLodingChecking
+  );
   const loading = useSelector(state => state.loading.isLoginViaEth);
+
+  console.log(isGlobalLodingChecking);
 
   const openChromeWithMetamask = useCallback(() => {
     ipcRenderer.invoke('loginWithMetamask');
@@ -294,6 +301,10 @@ const Login = () => {
       ipcRenderer.removeAllListeners('receive-metamask-login-params');
     };
   }, [dispatch, setParams]);
+
+  // useEffect(() => {
+  //   if (currentUser)
+  // }, [currentUser]);
 
   return (
     <Transition timeout={300}>
@@ -361,9 +372,9 @@ const Login = () => {
                   <>
                     <MetamaskLoginButton
                       color="primary"
-                      onClick={loading ? () => { } : openChromeWithMetamask}
+                      onClick={loading ? () => {} : openChromeWithMetamask}
                     >
-                      {loading ? (
+                      {loading || isGlobalLodingChecking ? (
                         'authing...'
                       ) : (
                         <>
@@ -379,7 +390,7 @@ const Login = () => {
                 )}
               </ButtonGroup>
               {isConfirmAccount ? null : (
-                <HelpLink href='https://docs.metacraft.cc/guides/how-to-install-and-use-metamask'>
+                <HelpLink href="https://docs.metacraft.cc/guides/how-to-install-and-use-metamask">
                   How to install and use Metamask?
                   <FontAwesomeIcon
                     css={`
@@ -389,7 +400,8 @@ const Login = () => {
                   />
                 </HelpLink>
               )}
-              <HelpLink href='https://docs.metacraft.cc/guides/beginners-guide'
+              <HelpLink
+                href="https://docs.metacraft.cc/guides/beginners-guide"
                 css={`
                   margin-top: 6px;
                 `}
@@ -397,8 +409,8 @@ const Login = () => {
                 How to play?
                 <FontAwesomeIcon
                   css={`
-                      margin-left: 6px;
-                    `}
+                    margin-left: 6px;
+                  `}
                   icon={faQuestionCircle}
                 />
               </HelpLink>

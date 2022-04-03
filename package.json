@@ -73,9 +73,6 @@
   "engines": {
     "node": ">=14.16.0"
   },
-  "cpu": [
-    "x64"
-  ],
   "browserslist": {
     "production": [
       ">0.2%",
@@ -116,7 +113,7 @@
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
-    "electron": "^16.0.7",
+    "electron": "^17.2.0",
     "electron-builder": "^22.14.5",
     "electron-devtools-installer": "^3.2.0",
     "electron-updater": "^4.6.1",
