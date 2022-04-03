@@ -121,45 +121,45 @@ app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
 const edit = [
   ...(process.platform === 'darwin'
     ? [
-      {
-        label: 'GDLauncher',
-        submenu: [
-          {
-            label: 'About GDLauncher',
-            role: 'about'
-          },
-          { type: 'separator' },
-          {
-            label: 'Services',
-            role: 'services',
-            submenu: []
-          },
-          { type: 'separator' },
-          {
-            label: 'Hide GDLauncher',
-            accelerator: 'Command+H',
-            role: 'hide'
-          },
-          {
-            label: 'Hide Others',
-            accelerator: 'Command+Alt+H',
-            role: 'hideOthers'
-          },
-          {
-            label: 'Show All',
-            role: 'unhide'
-          },
-          { type: 'separator' },
-          {
-            label: 'Quit GDLauncher',
-            accelerator: 'Command+Q',
-            click: () => {
-              app.quit();
+        {
+          label: 'GDLauncher',
+          submenu: [
+            {
+              label: 'About GDLauncher',
+              role: 'about'
+            },
+            { type: 'separator' },
+            {
+              label: 'Services',
+              role: 'services',
+              submenu: []
+            },
+            { type: 'separator' },
+            {
+              label: 'Hide GDLauncher',
+              accelerator: 'Command+H',
+              role: 'hide'
+            },
+            {
+              label: 'Hide Others',
+              accelerator: 'Command+Alt+H',
+              role: 'hideOthers'
+            },
+            {
+              label: 'Show All',
+              role: 'unhide'
+            },
+            { type: 'separator' },
+            {
+              label: 'Quit GDLauncher',
+              accelerator: 'Command+Q',
+              click: () => {
+                app.quit();
+              }
             }
-          }
-        ]
-      }
-    ]
+          ]
+        }
+      ]
     : []),
   {
     label: 'Edit',
@@ -346,7 +346,7 @@ function createWindow() {
         ...requestHeaders
       } = details.requestHeaders;
       if (xSkipOrigin !== 'skip') {
-        requestHeaders.Origin = 'https://metacraft.cc';
+        requestHeaders.Origin = 'https://dapp.test.metacraft.cc';
       }
       callback({ cancel: false, requestHeaders });
     }
@@ -455,7 +455,7 @@ ipcMain.handle('loginWithMetamask', (e, address = '') => {
   // const url = isDev
   //   ? `http://localhost:3001?name=${username}`
   //   : `https://metacraft-frontend.vercel.app?name=${username}`;
-  const url = `https://metacraft.cc/launcher-login?address=${address}&origin=launcher`;
+  const url = `https://dapp.test.metacraft.cc/launcher-login?address=${address}&origin=launcher`;
 
   shell.openExternal(url);
 });
@@ -755,7 +755,8 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       `ping 127.0.0.1 -n 1 > nul & robocopy "${path.join(
         tempFolder,
         'update'
-      )}" "." /MOV /E${quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
+      )}" "." /MOV /E${
+        quitAfterInstall ? '' : ` & start "" "${app.getPath('exe')}"`
       }
         DEL "${path.join(tempFolder, updaterVbs)}"
         DEL "%~f0"
@@ -766,9 +767,9 @@ ipcMain.handle('installUpdateAndQuitOrRestart', async (e, quitAfterInstall) => {
       path.join(tempFolder, updaterVbs),
       `Set WshShell = CreateObject("WScript.Shell") 
           WshShell.Run chr(34) & "${path.join(
-        tempFolder,
-        updaterBat
-      )}" & Chr(34), 0
+            tempFolder,
+            updaterBat
+          )}" & Chr(34), 0
           Set WshShell = Nothing
           `
     );

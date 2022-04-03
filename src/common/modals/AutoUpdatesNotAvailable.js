@@ -19,7 +19,8 @@ const AutoUpdatesNotAvailable = () => {
           `}
         >
           Please, update Metacraft through your package manager or download the
-          new version from our website <a href="https://metacraft.cc">here</a>
+          new version from our website{' '}
+          <a href="https://dapp.test.metacraft.cc">here</a>
         </div>
       </Container>
     </Modal>

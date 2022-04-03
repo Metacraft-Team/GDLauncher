@@ -631,7 +631,7 @@ export const getJVMArguments113 = (
             );
             break;
           case 'launcher_name':
-            val = args[i].replace(argDiscovery, 'Metacraft');
+            val = args[i].replace(argDiscovery, 'Metacraft-test');
             break;
           case 'launcher_version':
             val = args[i].replace(argDiscovery, '1.0');
