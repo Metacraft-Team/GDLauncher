@@ -173,7 +173,13 @@ const commonConfig = {
       hardenedRuntime: true,
       entitlements: './entitlements.mac.plist',
       entitlementsInherit: './entitlements.mac.plist',
-      target: ['dmg', 'zip']
+      target: {
+        target: 'default',
+        'arch': [
+          "x64",
+          "arm64"
+        ]
+      }
     },
     /* eslint-disable */
     artifactName: `${'${productName}'}-${'${os}'}-${process.argv[2]
