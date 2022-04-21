@@ -134,11 +134,18 @@ const commonConfig = {
       'package.json',
       'public/icon.png'
     ],
-    extraFiles,
-    extraResources: {
-      from: 'public/authlib-injector.jar',
-      to: './'
-    },
+    // extraFiles,
+    extraResources: [
+      {
+        from: 'public/authlib-injector.jar',
+        to: './'
+      },
+      {
+        from: sevenZipPath,
+        to: './'
+      }
+      // ...extraFiles
+    ],
     asar: {
       smartUnpack: false
     },
@@ -171,13 +178,13 @@ const commonConfig = {
     },
     mac: {
       hardenedRuntime: true,
+      gatekeeperAssess: false,
       entitlements: './entitlements.mac.plist',
       entitlementsInherit: './entitlements.mac.plist',
       target: {
         target: 'default',
-        'arch': [
+        arch: [
           "x64",
-          "arm64"
         ]
       }
     },
