@@ -134,11 +134,17 @@ const commonConfig = {
       'package.json',
       'public/icon.png'
     ],
-    extraFiles,
-    extraResources: {
-      from: 'public/authlib-injector.jar',
-      to: './'
-    },
+    // extraFiles,
+    extraResources: [
+      {
+        from: 'public/authlib-injector.jar',
+        to: './'
+      },
+      {
+        from: sevenZipPath,
+        to: './'
+      }
+    ],
     asar: {
       smartUnpack: false
     },
@@ -170,10 +176,16 @@ const commonConfig = {
       include: './public/installer.nsh'
     },
     mac: {
-      "hardenedRuntime": true,
+      hardenedRuntime: true,
+      gatekeeperAssess: false,
       entitlements: './entitlements.mac.plist',
       entitlementsInherit: './entitlements.mac.plist',
-      "target": ["dmg", "zip"]
+      target: {
+        target: 'default',
+        arch: [
+          "x64",
+        ]
+      }
     },
     /* eslint-disable */
     artifactName: `${'${productName}'}-${'${os}'}-${process.argv[2]
