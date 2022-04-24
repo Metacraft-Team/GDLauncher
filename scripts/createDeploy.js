@@ -134,17 +134,12 @@ const commonConfig = {
       'package.json',
       'public/icon.png'
     ],
-    // extraFiles,
+    extraFiles,
     extraResources: [
       {
         from: 'public/authlib-injector.jar',
         to: './'
-      },
-      {
-        from: sevenZipPath,
-        to: './'
       }
-      // ...extraFiles
     ],
     asar: {
       smartUnpack: false
