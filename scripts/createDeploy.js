@@ -9,8 +9,9 @@ const fse = require('fs-extra');
 const electronBuilder = require('electron-builder');
 const dotenv = require('dotenv');
 
+process.env.CSC_IDENTITY_AUTO_DISCOVERY = false
+
 const { platform } = process;
-// const platform = "win32"
 dotenv.config();
 
 const readdir = promisify(fs.readdir);
@@ -124,24 +125,21 @@ extraFiles.push({
 const commonConfig = {
   publish: 'never',
   config: {
+    // afterSign: "scripts/notarize.js",
     generateUpdatesFilesForAllChannels: true,
     npmRebuild: false,
     productName: 'Metacraft',
-    appId: 'cc.Launcher.Metacraft',
+    appId: 'cc.metacraft.metacraft-launcher',
     files: [
       '!node_modules/**/*',
       'build/**/*',
       'package.json',
       'public/icon.png'
     ],
-    // extraFiles,
+    extraFiles,
     extraResources: [
       {
         from: 'public/authlib-injector.jar',
-        to: './'
-      },
-      {
-        from: sevenZipPath,
         to: './'
       }
     ],
@@ -149,6 +147,7 @@ const commonConfig = {
       smartUnpack: false
     },
     dmg: {
+      sign: false,
       contents: [
         {
           x: 130,
@@ -181,10 +180,11 @@ const commonConfig = {
       entitlements: './entitlements.mac.plist',
       entitlementsInherit: './entitlements.mac.plist',
       target: {
-        target: 'default',
-        arch: [
-          "x64",
-        ]
+        target: 'zip',
+        arch: ["x64"]
+      },
+      extendInfo: {
+        "NSMicrophoneUsageDescription": "Please give us access to your microphone"
       }
     },
     /* eslint-disable */
@@ -215,9 +215,6 @@ const commonConfig = {
   }),
   ...(platform === 'win32' && {
     win: [type === 'setup' ? 'nsis:x64' : 'zip:x64']
-  }),
-  ...(platform === 'darwin' && {
-    mac: type === 'setup' ? ['dmg:x64'] : []
   })
 };
 

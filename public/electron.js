@@ -8,7 +8,8 @@ const {
   shell,
   screen,
   globalShortcut,
-  nativeImage
+  nativeImage,
+  systemPreferences
 } = require('electron');
 const path = require('path');
 const { spawn, exec } = require('child_process');
@@ -402,6 +403,8 @@ function createWindow() {
 
   mainWindow.webContents.on('will-navigate', handleRedirect);
   mainWindow.webContents.on('new-window', handleRedirect);
+
+  systemPreferences.askForMediaAccess('microphone');
 }
 
 if (isDev) {
