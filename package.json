@@ -103,7 +103,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.15",
     "babel-core": "^6.26.3",
-    "babel-loader": "^8.2.2",
+    "babel-loader": "8.1.0",
     "babel-plugin-macros": "^3.1.0",
     "babel-plugin-module-resolver": "^4.1.0",
     "babel-plugin-preval": "^5.0.0",
@@ -138,7 +138,6 @@
     "rimraf": "^3.0.2",
     "terser-webpack-plugin": "^4.1.0",
     "wait-on": "^6.0.0",
-    "webpack": "^4.46.0",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.7.2",
     "webpack-merge": "^5.8.0"
