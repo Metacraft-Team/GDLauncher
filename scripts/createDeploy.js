@@ -9,7 +9,7 @@ const fse = require('fs-extra');
 const electronBuilder = require('electron-builder');
 const dotenv = require('dotenv');
 
-process.env.CSC_IDENTITY_AUTO_DISCOVERY = false
+// process.env.CSC_IDENTITY_AUTO_DISCOVERY = false
 
 const { platform } = process;
 dotenv.config();
@@ -180,7 +180,7 @@ const commonConfig = {
       entitlements: './entitlements.mac.plist',
       entitlementsInherit: './entitlements.mac.plist',
       target: {
-        target: 'zip',
+        target: 'dmg',
         arch: ["x64"]
       },
       extendInfo: {
@@ -252,7 +252,7 @@ const main = async () => {
       ]
     },
     portable: {
-      darwin: [`${productName}-mac-${type}.zip`],
+      darwin: [`${productName}-mac-${type}.dmg`],
       win32: [`${productName}-win-${type}.zip`],
       linux: [`${productName}-linux-${type}.snap`]
     }

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import makeDir from 'make-dir';
 import fss from 'fs';
 import axios from 'axios';

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, lazy } from 'react';
 import styled from 'styled-components';
 import { Button } from 'antd';

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ipcRenderer } from 'electron';

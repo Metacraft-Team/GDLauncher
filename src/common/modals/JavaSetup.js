@@ -1,4 +1,4 @@
-/* eslint-disable no-loop-func */
+/* eslint-disable */
 import React, { useState, useEffect, memo } from 'react';
 import { Button, Progress, Input, notification } from 'antd';
 import { Transition } from 'react-transition-group';

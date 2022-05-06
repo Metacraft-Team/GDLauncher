@@ -1,3 +1,4 @@
+/* eslint-disable */
 // import watch from "node-watch";
 import makeDir from 'make-dir';
 import { ipcRenderer } from 'electron';

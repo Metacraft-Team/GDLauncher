@@ -1,3 +1,4 @@
+/* eslint-disable */
 import axios from 'axios';
 import path from 'path';
 import { ipcRenderer } from 'electron';

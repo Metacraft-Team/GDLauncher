@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { memo } from 'react';
 
 const AcceptableUsePolicy = () => {

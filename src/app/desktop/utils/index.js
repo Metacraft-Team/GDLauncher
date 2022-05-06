@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { promises as fs } from 'fs';
 import originalFs from 'original-fs';
 import fse from 'fs-extra';

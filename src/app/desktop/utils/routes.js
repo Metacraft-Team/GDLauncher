@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { lazy } from 'react';
 import AsyncComponent from '../../../common/components/AsyncComponent';
 import withScroll from './withScroll';
